@@ -1,11 +1,13 @@
 (ns user
-  (:require [org.httpkit.server :refer [run-server]]
-            [compojure.handler :refer [site]]
-            [ring.middleware.reload :as reload]
-            [async-workshop.server.routes :refer [app]]
-            [net.cgrand.enlive-html :as enlive]
+  (:require [async-workshop.server.routes :refer [app]]
             [cemerick.austin :as austin]
-            [cemerick.austin.repls :refer [browser-connected-repl-js browser-repl-env]]))
+            [cemerick.austin.repls :refer [browser-connected-repl-js browser-repl-env]]
+            [clojure.java.io :as jio]
+            [compojure.handler :refer [site]]
+            [net.cgrand.enlive-html :as enlive]
+            [org.httpkit.server :refer [run-server]]
+            [ring.middleware.reload :as reload]
+            [ring.middleware.file :refer [file-request wrap-file]]))
 
 (def options
   {:port 9000})
@@ -27,7 +29,7 @@
   [response]
   (update-in response [:body]
              (fn [body]
-               ((enlive/template (enlive/html-resource body)    
+               ((enlive/template (enlive/html-resource body)
                                  []
                                  [:body] (enlive/append
                                            (enlive/html [:script {:src "browser_repl.js"}]
@@ -37,18 +39,45 @@
   [handler]
   (fn [request]
     (let [response (handler request)]
-      (if (is-html-response? response) 
+      (if (is-html-response? response)
         (-> response
             (strip-content-length)
             (add-austin-script-tag))
         response))))
 
+(defn wrap-serve-dir
+  [handler dir]
+  (if (.isDirectory (jio/file dir))
+    (-> handler
+        (wrap-file dir))
+    handler))
+
+(defn wrap-serve-bower-components-dir
+  [handler]
+  (let [components-dir "../bower_components"]
+    (if (.isDirectory (jio/file components-dir))
+      (fn [{:keys [uri] :as req}]
+        (if-let [[_ component-path] (re-matches #"^/components(/.*)" uri)]
+          (or (file-request (assoc req :uri component-path)
+                            components-dir)
+              (handler req))
+          (handler req)))
+      handler)))
+
+(defn wrap-generator-dirs
+  [handler]
+  (-> handler
+      (wrap-serve-dir "../src")
+      (wrap-serve-dir "../build")
+      (wrap-serve-bower-components-dir)))
+
 (defn start-server
   [server]
   (if-not server
-    (run-server (-> (site  #'app)
+    (run-server (-> (site #'app)
+                    (wrap-generator-dirs)
                     (wrap-austin)
-                    (reload/wrap-reload {:dirs "src/clj"}))
+                    (reload/wrap-reload {:dirs ["src/clj" "devel/clj"]}))
                 options)
     server))
 
