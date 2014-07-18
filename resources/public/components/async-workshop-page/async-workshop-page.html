@@ -1,0 +1,64 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-header-panel/core-header-panel.html">
+<link rel="import" href="../core-scaffold/core-scaffold.html">
+<link rel="import" href="../core-toolbar/core-toolbar.html">
+<link rel="import" href="../font-roboto/roboto.html">
+<link rel="import" href="../paper-button/paper-button.html">
+
+<polymer-element name="async-workshop-page" attributes="pageTitle pageSubtitle currentSection collapsible">
+  <template>
+    <link rel="stylesheet" href="async-workshop-page.css">
+    <core-scaffold id="pageScaffold" mode="{{collapsible ? 'waterfall-tall' : 'seamed'}}">
+      <core-header-panel navigation flex mode="seamed">
+        <core-toolbar>
+          <div flex>
+            Get <span class="tt-font">go</span>ing with <span class="tt-font">core.async</span>
+          </div>
+        </core-toolbar>
+      </core-header-panel>
+      <div tool flex></div>
+      <div id="pageTitle" tool class="middle">{{pageTitle}}</div>
+      <div id="pageSubtitle" tool class="bottom">{{pageSubtitle}}</div>
+      <paper-button tool label="Tutorial" class="header-button" section="tutorial" on-click="{{headerClick}}"></paper-button>
+      <paper-button tool label="Reference" class="header-button" section="reference" on-click="{{headerClick}}"></paper-button>
+      <paper-button tool label="Chat Demo" class="header-button" section="chat-demo" on-click="{{headerClick}}"></paper-button>
+      <content select="*"></content>
+    </core-scaffold>
+  </template>
+  <script>
+    Polymer('async-workshop-page', {
+      collapsible: true,
+      pageTitle: "Insert title here",
+      pageSubtitle: "Insert subtitle here",
+      headerClick: function(e) {
+        window.location.href = '/' + e.target.getAttribute('section');
+      },
+      domReady: function() {
+        if (this.currentSection) {
+          var sectionButtons = this.$.scaffold.querySelectorAll('paper-button[section]');
+          for (var i = 0; i < sectionButtons.length; ++i) {
+            var sectionButton = sectionButtons[i];
+            var section = sectionButton.getAttribute('section');
+            if (section === this.currentSection) {
+              sectionButton.setAttribute('active', true);
+            }
+          }
+        }
+
+        var thisPage = this;
+        var headerPanel = this.$.pageScaffold.$.drawerPanel.querySelector('core-header-panel[main]');
+        var onScroll = function(e) {
+          var header = headerPanel.$.headerContent.getDistributedNodes()[0];
+          if (header) {
+            var isTall = header.classList.contains('tall');
+            thisPage.$.pageTitle.classList.toggle('tall', isTall);
+            thisPage.$.pageSubtitle.classList.toggle('tall', isTall);
+          }
+        };
+        headerPanel.$.outerContainer.addEventListener('scroll', onScroll);
+        headerPanel.$.mainContainer.addEventListener('scroll', onScroll);
+        onScroll();
+      }
+    });
+  </script>
+</polymer-element>

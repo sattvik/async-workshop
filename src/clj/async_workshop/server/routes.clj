@@ -1,10 +1,11 @@
 (ns async-workshop.server.routes
-  (:require [compojure.core :refer [defroutes GET]]
+  (:require [async-workshop.server.pages :as pages]
+            [compojure.core :refer [defroutes GET]]
             [compojure.route :as route]))
 
 (defroutes routes
   (route/resources "/")
-  (route/not-found "TODO: not found"))
+  (route/not-found (pages/workshop-page)))
 
 (defn root-as-index
   [handler]
