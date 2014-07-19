@@ -1,17 +1,14 @@
 (ns async-workshop.server.routes
   (:require [async-workshop.server.pages :as pages]
+            [async-workshop.server.pages.reference :as reference]
             [compojure.core :refer [defroutes GET]]
             [compojure.route :as route]))
 
 (defroutes routes
+  (GET "/" [] pages/main-page)
+  (GET "/reference" [] reference/main-page)
+  (GET "/reference/primitives" [] reference/primitives-page)
   (route/resources "/")
-  (route/not-found (pages/workshop-page)))
+  (route/not-found pages/not-found))
 
-(defn root-as-index
-  [handler]
-  (fn [req]
-    (handler (update-in req [:uri] #(if (= "/" %) "/index.html" %)))))
-
-(def app
-  (-> routes
-      root-as-index))
+(def app routes)

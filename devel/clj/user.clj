@@ -5,6 +5,7 @@
             [clojure.java.io :as jio]
             [compojure.handler :refer [site]]
             [net.cgrand.enlive-html :as enlive]
+            [net.cgrand.reload :as enlive-reload]
             [org.httpkit.server :refer [run-server]]
             [ring.middleware.reload :as reload]
             [ring.middleware.file :refer [file-request wrap-file]]))
@@ -45,37 +46,10 @@
             (add-austin-script-tag))
         response))))
 
-(defn wrap-serve-dir
-  [handler dir]
-  (if (.isDirectory (jio/file dir))
-    (-> handler
-        (wrap-file dir))
-    handler))
-
-(defn wrap-serve-bower-components-dir
-  [handler]
-  (let [components-dir "../bower_components"]
-    (if (.isDirectory (jio/file components-dir))
-      (fn [{:keys [uri] :as req}]
-        (if-let [[_ component-path] (re-matches #"^/components(/.*)" uri)]
-          (or (file-request (assoc req :uri component-path)
-                            components-dir)
-              (handler req))
-          (handler req)))
-      handler)))
-
-(defn wrap-generator-dirs
-  [handler]
-  (-> handler
-      (wrap-serve-dir "../src")
-      (wrap-serve-dir "../build")
-      (wrap-serve-bower-components-dir)))
-
 (defn start-server
   [server]
   (if-not server
     (run-server (-> (site #'app)
-                    (wrap-generator-dirs)
                     (wrap-austin)
                     (reload/wrap-reload {:dirs ["src/clj" "devel/clj"]}))
                 options)
@@ -93,6 +67,10 @@
     repl-env))
 
 (defn start []
+  (enlive-reload/auto-reload *ns*)
+  (enlive-reload/auto-reload (find-ns 'async-workshop.server.routes))
+  (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages))
+  (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages.require))
   (swap! repl-env init-repl-env)
   (swap! server start-server))
 
