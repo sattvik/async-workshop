@@ -29,41 +29,5 @@
       </div>
     </core-scaffold>
   </template>
-  <script>
-    Polymer('async-workshop-page', {
-      collapsible: true,
-      pageTitle: "Insert title here",
-      pageSubtitle: "Insert subtitle here",
-      headerClick: function (e) {
-        window.location.href = '/' + e.target.getAttribute('section');
-      },
-      domReady: function () {
-        var thisPage = this;
-
-        if (this.currentSection) {
-          var sectionButtons = this.$.pageScaffold.querySelectorAll('paper-button[section]');
-          for (var i = 0; i < sectionButtons.length; ++i) {
-            var sectionButton = sectionButtons[i];
-            var section = sectionButton.getAttribute('section');
-            if (section === this.currentSection) {
-              sectionButton.setAttribute('active', true);
-            }
-          }
-        }
-
-        var headerPanel = this.$.pageScaffold.$.drawerPanel.querySelector('core-header-panel[main]');
-        var onScroll = function (e) {
-          var header = headerPanel.$.headerContent.getDistributedNodes()[0];
-          if (header) {
-            var isTall = header.classList.contains('tall');
-            thisPage.$.pageTitle.classList.toggle('tall', isTall);
-            thisPage.$.pageSubtitle.classList.toggle('tall', isTall);
-          }
-        };
-        headerPanel.$.outerContainer.addEventListener('scroll', onScroll);
-        headerPanel.$.mainContainer.addEventListener('scroll', onScroll);
-        onScroll();
-      }
-    });
-  </script>
+  <script src="async-workshop-page.js"></script>
 </polymer-element>
