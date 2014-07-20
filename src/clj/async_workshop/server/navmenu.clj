@@ -3,9 +3,9 @@
 
 (defsnippet item-snippet "templates/navmenu.html"
   [:paper-item]
-  [{:keys [label anchor]}]
+  [{:keys [label anchor]} base-uri]
   [:paper-item] (enlive/set-attr :label label)
-  [:a] (enlive/set-attr :href anchor))
+  [:a] (enlive/set-attr :href (str base-uri "#" anchor)))
 
 (defsnippet submenu-snippet "templates/navmenu.html"
   [:core-submenu]
@@ -18,7 +18,7 @@
                     (if (= base-uri uri)
                       (enlive/set-attr :active true)
                       (enlive/remove-attr :active))
-                    (enlive/content (map item-snippet items))))
+                    (enlive/content (map item-snippet items (repeat base-uri)))))
 
 (defsnippet menu-snippet "templates/navmenu.html"
   [:nav]

@@ -1,0 +1,26 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="/components/paper-shadow/paper-shadow.html">
+
+<polymer-element name="async-workshop-clojuredoc" attributes="varName isMacro argLists clojureOnly">
+  <template>
+    <link rel="stylesheet" type="text/css" href="async-workshop-clojuredoc.css">
+    <section id="docSection">
+      <header>
+        <h2 id="docTitle"><code>{{varName}}</code></h2>
+      </header>
+      <div>
+        <span id="varType">{{isMacro ? 'macro' : 'function'}}</span>
+        <template if="{{clojureOnly}}">
+          <span id="clojureOnly">Clojure only</span>
+        </template>
+      </div>
+      <pre id="invocationList"><code>{{argLists}}</code></pre>
+      <div id="docBody">
+        <content></content>
+      </div>
+      <paper-shadow z="1"></paper-shadow>
+    </section>
+
+  </template>
+  <script src="async-workshop-clojuredoc.js"></script>
+</polymer-element>

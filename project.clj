@@ -5,12 +5,12 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2268"]
-                 [http-kit "2.1.16"]
+                 [org.clojure/core.async "0.1.303.0-886421-alpha"]
                  [compojure "1.1.8"]
-                 [ring/ring-core "1.3.0"]
-                 [javax.servlet/servlet-api "2.5"]
                  [enlive "1.1.5"]
-                 [org.clojure/core.async "0.1.303.0-886421-alpha"]]
+                 [http-kit "2.1.16"]
+                 [javax.servlet/servlet-api "2.5"]
+                 [ring/ring-core "1.3.0"]]
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
   :main async-workshop.server

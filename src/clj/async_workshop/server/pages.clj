@@ -17,11 +17,11 @@
     :icon "home"
     :base-uri "/"
     :items [{:label "Welcome"
-             :anchor "#welcome"}
+             :anchor "welcome"}
             {:label "Requirements"
-             :anchor "#requirements"}
+             :anchor "requirements"}
             {:label "Getting started"
-             :anchor "#gettingstarted"}]}])
+             :anchor "gettingstarted"}]}])
 
 (defsnippet welcome-page-content "templates/welcome-page.html"
   [:body]
