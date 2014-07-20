@@ -68,9 +68,8 @@
 
 (defn start []
   (enlive-reload/auto-reload *ns*)
-  (enlive-reload/auto-reload (find-ns 'async-workshop.server.routes))
   (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages))
-  (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages.require))
+  (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages.reference))
   (swap! repl-env init-repl-env)
   (swap! server start-server))
 
