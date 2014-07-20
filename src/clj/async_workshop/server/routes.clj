@@ -5,9 +5,9 @@
             [compojure.route :as route]))
 
 (defroutes routes
-  (GET "/" [] pages/main-page)
-  (GET "/reference" [] reference/main-page)
-  (GET "/reference/primitives" [] reference/primitives-page)
+  (GET "/" request (pages/main-page request))
+  (GET "/reference" request (reference/main-page request))
+  (GET "/reference/apidocs" request (reference/apidocs-page request))
   (route/resources "/")
   (route/not-found pages/not-found))
 

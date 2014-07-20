@@ -15,9 +15,9 @@
                      (sort-by (comp name :name))))
 
 (def nav-menu
-  [{:label "Primitives"
+  [{:label "API Docs"
     :icon "settings"
-    :base-uri "/reference/primitives"
+    :base-uri "/reference/apidocs"
     :items (mapv (fn [meta]
                    {:label (name (:name meta))
                     :anchor (:id meta)})
@@ -61,7 +61,7 @@
        (map (fn [p] [:p p]))
        (el/html)))
 
-(defsnippet primitives-page-content "templates/reference/primitives.html"
+(defsnippet apidocs-page-content "templates/reference/apidocs.html"
   [:body]
   []
   [:body] el/unwrap
@@ -74,11 +74,11 @@
                                    (el/set-attr :clojureOnly (clojure-only-async-vars name))
                                    (el/content (parse-doc doc)))))
 
-(defn primitives-page
+(defn apidocs-page
   [req]
   (workshop-page
-    {:title "Primitives"
-     :subtitle "The core.async API"
+    {:title "API Documenation"
+     :subtitle "core.async in depth"
      :current-section "reference"
-     :content (primitives-page-content)
+     :content (apidocs-page-content)
      :nav-menu (navmenu/menu-snippet nav-menu req)}))

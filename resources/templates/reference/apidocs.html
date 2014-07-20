@@ -1,0 +1,32 @@
+<body>
+  <link rel="import" href="/components/async-workshop-clojuredoc/async-workshop-clojuredoc.html">
+  <section class="">
+    <h2><code>core.async</code> API reference</h2>
+    <p>
+      This page contains all of the documentation for the macros and functions available in <code>core.async</code>.
+      As you use this reference, keep a few things in mind:
+    </p>
+    <ol>
+      <li>If you are using Clojure, all of these vars will be found in <code>clojure.core.async</code>.</li>
+      <li>
+        If you are using ClojureScript, all functions will be found in <code>cljs.core.async</code> and all macros
+        will be found in <code>cljs.core.async.macros</code>
+      </li>
+      <li>
+        Some vars are only available in Clojure.  In particular, all those which require an actual thread or are
+        blocking.  ClojureScript runs in a single-threaded environment, so those vars do not make any sense.
+      </li>
+    </ol>
+  </section>
+  <async-workshop-clojuredoc varname="go" ismacro="true" arglists="([& body])">
+    <p>
+      Asynchronously executes the body, returning immediately to the calling thread. Additionally, any visible calls
+      to &lt;!, &gt;! and alt!/alts! channel operations within the body will block (if necessary) by 'parking' the calling
+      thread rather than tying up an OS thread (or the only JS thread when in ClojureScript). Upon completion of the
+      operation, the body will be resumed.
+    </p>
+    <p>
+      Returns a channel which will receive the result of the body when completed"
+    </p>
+  </async-workshop-clojuredoc>
+</body>
