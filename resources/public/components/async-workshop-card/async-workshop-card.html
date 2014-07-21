@@ -14,7 +14,7 @@
       </div>
       <div id="buttonRow" horizontal layout center>
         <template repeat="{{button in buttons}}">
-          <paper-button label="{{button.name}}" href="{{button.href}}" on-click="{{clickHandler}}" on-mouseover="{{mouseOverHandler}}" on-mouseout="{{mouseOutHandler}}"></paper-button>
+          <a href="{{button.href}}"><paper-button label="{{button.name}}" on-mouseover="{{mouseOverHandler}}" on-mouseout="{{mouseOutHandler}}"></paper-button></a>
         </template>
       </div>
       <paper-shadow z="1"></paper-shadow>

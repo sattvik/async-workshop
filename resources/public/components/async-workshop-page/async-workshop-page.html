@@ -12,17 +12,23 @@
     <link rel="stylesheet" type="text/css" href="async-workshop-page.css">
     <core-scaffold id="pageScaffold" mode="{{collapsible ? 'waterfall-tall' : 'seamed'}}">
       <core-header-panel navigation flex mode="seamed">
-        <core-toolbar id="navHeader">
-          <paper-button flex label="Get going" section="" on-tap="{{headerClick}}"></paper-button>
+        <core-toolbar id="navHeader" layout vertical center>
+          <a href="/"><paper-button flex label="Get going"></paper-button></a>
         </core-toolbar>
         <content id="navMenu" select="nav">
       </core-header-panel>
       <div tool flex></div>
       <h1 id="pageTitle" tool class="middle">{{pageTitle}}</h1>
       <div id="pageSubtitle" tool class="bottom">{{pageSubtitle}}</div>
-      <paper-button tool label="Tutorial" class="header-button" section="tutorial" on-tap="{{headerClick}}"></paper-button>
-      <paper-button tool label="Reference" class="header-button" section="reference" on-tap="{{headerClick}}"></paper-button>
-      <paper-button tool label="Chat Demo" class="header-button" section="chat-demo" on-tap="{{headerClick}}"></paper-button>
+      <a tool href="/tutorial">
+        <paper-button label="Tutorial" class="header-button" active="{{isActiveSection('/tutorial')}}"></paper-button>
+      </a>
+      <a tool href="/reference">
+        <paper-button label="Reference" class="header-button" active="{{isActiveSection('/reference')}}"></paper-button>
+      </a>
+      <a tool href="/chat-demo">
+        <paper-button label="Chat Demo" class="header-button" active="{{isActiveSection('/chat-demo')}}"></paper-button>
+      </a>
       <div id="pageContent">
         <content select="*"></content>
       </div>

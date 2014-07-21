@@ -3,12 +3,11 @@
             [net.cgrand.enlive-html :as enlive :refer [deftemplate defsnippet]]))
 
 (deftemplate workshop-page "templates/workshop-page.html"
-  [{:keys [title subtitle compact? content nav-menu current-section] :as page-info}]
+  [{:keys [title subtitle compact? content nav-menu] :as page-info}]
   [:async-workshop-page] (enlive/do->
                            (enlive/set-attr :collapsible (not compact?))
                            (enlive/set-attr :pageTitle title)
                            (enlive/set-attr :pageSubtitle subtitle)
-                           (enlive/set-attr :currentSection current-section)
                            (enlive/content content nav-menu))
   [:head :title] (enlive/content (str "Get going with core.async: " title)))
 

@@ -18,7 +18,12 @@
 
 (defn is-html-response?
   [response]
-  (= "text/html" (get-in response [:headers "Content-Type"])))
+  (when-let [content-type (get-in response [:headers "Content-Type"])]
+    (re-matches #".*text/html.*" content-type)))
+
+(defn is-component?
+  [request]
+  (re-matches #"^/components/.*" (:uri request)))
 
 (defn strip-content-length
   [response]
@@ -27,20 +32,19 @@
                (dissoc headers "Content-Length"))))
 
 (defn add-austin-script-tag
-  [response]
-  (update-in response [:body]
-             (fn [body]
-               ((enlive/template (enlive/html-resource body)
-                                 []
-                                 [:body] (enlive/append
-                                           (enlive/html [:script {:src "browser_repl.js"}]
-                                                        [:script (browser-connected-repl-js)])))))))
+  [{:keys [body] :as response}]
+  (assoc response :body
+         (enlive/emit*
+           (enlive/at (enlive/html-snippet (apply str body))
+                      [:body] (enlive/append
+                                (enlive/html [:script (browser-connected-repl-js)]))))))
 
 (defn wrap-austin
   [handler]
   (fn [request]
     (let [response (handler request)]
-      (if (is-html-response? response)
+      (if (and (not (is-component? request))
+               (is-html-response? response))
         (-> response
             (strip-content-length)
             (add-austin-script-tag))
@@ -67,9 +71,10 @@
     repl-env))
 
 (defn start []
-  (enlive-reload/auto-reload *ns*)
-  (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages))
-  (enlive-reload/auto-reload (find-ns 'async-workshop.server.pages.reference))
+  (dorun (map (comp enlive-reload/auto-reload find-ns)
+              '[async-workshop.server.pages
+                async-workshop.server.pages.reference
+                async-workshop.chat-demo.pages]))
   (swap! repl-env init-repl-env)
   (swap! server start-server))
 

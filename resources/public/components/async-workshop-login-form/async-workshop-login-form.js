@@ -1,0 +1,1 @@
+Polymer("async-workshop-login-form",{submitted:!1,submitForm:function(){this.$.handleInput.invalid||this.submitted||(this.submitted=!0,this.$.handleInput.disabled=!0,this.$.submitButton.disabled=!0,this.$.shadowHandleInput.value=this.$.handleInput.value,this.$.shadowForm.submit())}});

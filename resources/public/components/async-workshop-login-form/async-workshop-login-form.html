@@ -1,0 +1,17 @@
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/components/paper-input/paper-input.html">
+<link rel="import" href="/components/paper-button/paper-button.html">
+
+<polymer-element name="async-workshop-login-form">
+  <template>
+    <link rel="stylesheet" type="text/css" href="async-workshop-login-form.css">
+    <div vertical layout start>
+      <paper-input id="handleInput" label="Please enter your handle" required on-change="{{submitForm}}"></paper-input>
+      <paper-button id="submitButton" label="enter chat" raisedbutton on-tap="{{submitForm}}"></paper-button>
+      <form id="shadowForm" method="post">
+        <input id="shadowHandleInput" type="hidden" name="username">
+      </form>
+    </div>
+  </template>
+  <script src="async-workshop-login-form.js"></script>
+</polymer-element>
