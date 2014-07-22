@@ -14,12 +14,13 @@
         (async/put! in {:type :close
                         :value status})))
     (go-loop []
-      (when-some [m (<! in)]
-        (recur)))
-    (web-socket/send! socket "Hello, there!")))
+      (when-let [{:keys [type value]} (<! in)]
+        (when (identical? :message type)
+          (web-socket/send! socket value)
+          (recur))))))
 
 (defn chatroom-handler
   [req]
-  (web-socket/with-channel req channel
-    (init-session channel)))
+  (web-socket/with-channel req socket
+    (init-session socket)))
 

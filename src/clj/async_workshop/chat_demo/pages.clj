@@ -27,13 +27,15 @@
 
 (defsnippet chatroom-content "templates/chat/chatroom.html"
   [:template :> el/any-node]
-  [req]
-  [:h2] (el/content "Welcome to the chat, " (get-in req [:session ::friend/identity :current]))
-  )
+  [{:keys [chatname]}]
+  [:h2] (el/content "Welcome to the chat, " chatname))
 
 (defn chatroom
   [req]
   (workshop-page
     {:tatle "Chat room"
      :compact? true
-     :content (chatroom-content req)}))
+     :content (chatroom-content
+                (assoc req :chatname (get-in req [:session
+                                                  ::friend/identity
+                                                  :current])))}))

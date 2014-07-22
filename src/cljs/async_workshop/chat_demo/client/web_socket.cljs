@@ -1,5 +1,5 @@
 (ns async-workshop.chat-demo.client.web-socket
-  (:require [cljs.core.async :as async :refer [put! <!]]
+  (:require [cljs.core.async :as async :refer [alts! put!]]
             [goog.events :as ev]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true])
@@ -26,7 +26,7 @@
                               {:type :error
                                :value (.-data e)}
                             WebSocket.EventType.MESSAGE
-                              {:type :message
+                              {:type :rx-message
                                :value (.-message e)}
                             WebSocket.EventType.OPENED
                               {:type :opened}))))
@@ -34,15 +34,19 @@
      :socket socket}))
 
 (defn ^:private event-loop
-  [global-state in]
-  (go-loop []
-    (when-some [{:keys [type value]} (<! in)]
-      (let [msg (condp = type
-                  :closed "Connection to server closed"
-                  :error (str "Connection error: " value)
-                  :message (str "Received message: " value)
-                  :opened "Connection to server established")]
-        (om/transact! global-state [:chat-history] #(conj % msg))
+  [global-state rx socket]
+  (let [tx (get global-state :transmit-channel)
+        append-chat-history
+          (fn [msg]
+            (om/transact! global-state [:chat-history] #(conj % msg)))]
+    (go-loop []
+      (when-some [[{:keys [type value]} _] (alts! [tx rx])]
+        (condp = type
+          :closed (append-chat-history "Connection to server closed")
+          :error (append-chat-history (str "Connection error: " value))
+          :rx-message (append-chat-history (str "Received message: " value))
+          :tx-message (.send socket value)
+          :opened (append-chat-history "Connection to server established"))
         (recur)))))
 
 (defn ^:private startup
@@ -51,7 +55,7 @@
   [global-state {:keys [in socket] :as local-state}]
   (let [doc-uri (.-location js/window)
         ws-uri (str "ws://" (.-host doc-uri) (.-pathname doc-uri) "/ws")]
-    (event-loop global-state in)
+    (event-loop global-state in socket)
     (.open socket ws-uri)))
 
 (defn ^:private shutdown
