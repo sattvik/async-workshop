@@ -1,5 +1,6 @@
 (ns async-workshop.chat-demo.server.routes
-  (:require [async-workshop.chat-demo.pages :as pages]
+  (:require [async-workshop.chat-demo.chatroom :refer [chatroom-handler]]
+            [async-workshop.chat-demo.pages :as pages]
             [async-workshop.server.pages :refer [not-found]]
             [cemerick.friend :as friend]
             [cemerick.friend.workflows :as workflows]
@@ -8,7 +9,8 @@
             [ring.util.response :refer [redirect]]))
 
 (defroutes chatroom-routes
-  (GET "/" request pages/chatroom))
+  (GET "/" request pages/chatroom)
+  (GET "/ws" request chatroom-handler))
 
 (defroutes chat-routes
   (GET "/" request pages/landing-page)

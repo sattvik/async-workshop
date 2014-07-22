@@ -68,10 +68,10 @@
   [:async-workshop-clojuredoc] (el/clone-for [{:keys [doc id name macro arglists]} async-vars]
                                  (el/do->
                                    (el/set-attr :id id)
-                                   (el/set-attr :varName name)
-                                   (el/set-attr :isMacro macro)
-                                   (el/set-attr :argLists (render-invocations name arglists))
-                                   (el/set-attr :clojureOnly (clojure-only-async-vars name))
+                                   (el/set-attr :varname name)
+                                   (el/set-attr :ismacro macro)
+                                   (el/set-attr :arglists (render-invocations name arglists))
+                                   (el/set-attr :clojureonly (clojure-only-async-vars name))
                                    (el/content (parse-doc doc)))))
 
 (defn apidocs-page

@@ -13,18 +13,17 @@
                  [javax.servlet/servlet-api "2.5"]
                  [om "0.6.4"]
                  [ring/ring-core "1.3.0"]]
+  :plugins [[lein-cljsbuild "1.0.3"]]
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
   :main async-workshop.server
   :hooks [leiningen.cljsbuild]
+  :cljsbuild {:builds [{:source-paths ["src/cljs"]
+                        :compiler {:output-to "target/classes/public/js/chatDriver.js"
+                                   :output-dir "target/classes/public/js"
+                                   :optimizations :none
+                                   :source-map true}}]}
   :profiles {:dev {:source-paths ["devel/clj"]
                    :dependencies [[ring/ring-devel "1.3.0"]]
-                   :plugins [[com.cemerick/austin "0.1.4"]
-                             [lein-cljsbuild "1.0.3"]]
-                   :cljsbuild {:builds [{:id "devel"
-                                         :source-paths ["src/cljs"]
-                                         :compiler {:output-to "target/classes/public/js/chatDriver.js"
-                                                    :output-dir "target/classes/public/js"
-                                                    :optimizations :none
-                                                    :source-map true}}]}}
+                   :plugins [[com.cemerick/austin "0.1.4"]]}
              :uberjar {:aot :all}})
