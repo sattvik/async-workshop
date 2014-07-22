@@ -44,7 +44,7 @@
         (condp = type
           :closed (append-chat-history "Connection to server closed")
           :error (append-chat-history (str "Connection error: " value))
-          :rx-message (append-chat-history (str "Received message: " value))
+          :rx-message (append-chat-history value)
           :tx-message (.send socket value)
           :opened (append-chat-history "Connection to server established"))
         (recur)))))
