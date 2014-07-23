@@ -10,7 +10,9 @@
 (defn send-message
   [app-state owner]
   (let [msg (om/get-state owner :text)]
-    (.log js/console (str "Sending: " msg))
+    (async/put! (:transmit-channel @app-state)
+                {:type :tx-message
+                 :value msg})
     (om/set-state! owner :text "")))
 
 (defn chat-input-widget

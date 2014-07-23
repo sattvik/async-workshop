@@ -36,17 +36,19 @@
      :socket-events events}))
 
 (defn ^:private event-loop
-  [app-state socket-events]
-  (let [append-chat-history
+  [app-state socket-events socket]
+  (let [tx-channel (:transmit-channel app-state)
+        append-chat-history
           (fn [msg]
             (om/transact! app-state [:chat-history] #(conj % msg)))]
     (go-loop []
-      (when-let [{:keys [type value]} (async/<! socket-events)]
+      (when-let [[{:keys [type value]} _] (async/alts! [socket-events tx-channel])]
         (condp = type
           :socket-opened (append-chat-history "Connection to server established.")
           :socket-closed (append-chat-history "Connection to server lost.")
           :socket-error  (append-chat-history (str "Connection error: " value))
-          :rx-message    (append-chat-history value)))
+          :rx-message    (append-chat-history value)
+          :tx-message    (.send socket value)))
       (recur))))
 
 (defn ^:private startup
@@ -55,7 +57,7 @@
   [global-state {:keys [socket socket-events] :as local-state}]
   (let [doc-uri (.-location js/window)
         ws-uri (str "ws://" (.-host doc-uri) (.-pathname doc-uri) "/ws")]
-    (event-loop global-state socket-events)
+    (event-loop global-state socket-events socket)
     (.open socket ws-uri)))
 
 (defn ^:private shutdown
