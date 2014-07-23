@@ -1,5 +1,6 @@
 (ns async-workshop.chat-demo.client
-  (:require [async-workshop.chat-demo.client.web-socket :refer [ws-widget]]
+  (:require [async-workshop.chat-demo.client.input :refer [chat-input-widget]]
+            [async-workshop.chat-demo.client.web-socket :refer [ws-widget]]
             [clojure.browser.repl]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
@@ -19,6 +20,9 @@
 
 (om/root chat-history-widget app-state
   {:target (.getElementById js/document "chatHistoryWidget")})
+
+(om/root chat-input-widget app-state
+  {:target (.getElementById js/document "chatInputWidget")})
 
 (om/root ws-widget app-state
   {:target (.getElementById js/document "socketWidget")})
