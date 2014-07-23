@@ -1,7 +1,9 @@
 (ns async-workshop.chat-demo.client.web-socket
   (:require [goog.events :as ev]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true])
+            [om.dom :as dom :include-macros true]
+            [cljs.core.async :as async])
+  (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:import goog.net.WebSocket))
 
 (defn ^:private make-init-state
@@ -9,28 +11,58 @@
   instantiates a WebSocket instance and creates a core.async channel for
   handling events from the WebSocket. "
   []
-  (let [socket (WebSocket.)]
+  (let [socket (WebSocket.)
+        events (async/chan)]
     (ev/listen socket
                #js [WebSocket.EventType.CLOSED
                     WebSocket.EventType.ERROR
                     WebSocket.EventType.MESSAGE
                     WebSocket.EventType.OPENED]
                (fn [e]
-                 (.log js/console (.-type e))))
-    {:socket socket}))
+                 (async/put!
+                   events
+                   (condp = (.-type e)
+                     WebSocket.EventType.CLOSED
+                       {:type :socket-closed}
+                     WebSocket.EventType.ERROR
+                       {:type :socket-error
+                        :value (.-data e)}
+                     WebSocket.EventType.MESSAGE
+                       {:type :rx-message
+                        :value (.-message e)}
+                     WebSocket.EventType.OPENED
+                       {:type :socket-opened}))))
+    {:socket socket
+     :socket-events events}))
+
+(defn ^:private event-loop
+  [app-state socket-events]
+  (let [append-chat-history
+          (fn [msg]
+            (om/transact! app-state [:chat-history] #(conj % msg)))]
+    (go-loop []
+      (when-let [{:keys [type value]} (async/<! socket-events)]
+        (condp = type
+          :socket-opened (append-chat-history "Connection to server established.")
+          :socket-closed (append-chat-history "Connection to server lost.")
+          :socket-error  (append-chat-history (str "Connection error: " value))
+          :rx-message    (append-chat-history value)))
+      (recur))))
 
 (defn ^:private startup
   "Actually connects the web socket to the server and starts the local event
   loop."
-  [global-state {:keys [socket] :as local-state}]
+  [global-state {:keys [socket socket-events] :as local-state}]
   (let [doc-uri (.-location js/window)
         ws-uri (str "ws://" (.-host doc-uri) (.-pathname doc-uri) "/ws")]
+    (event-loop global-state socket-events)
     (.open socket ws-uri)))
 
 (defn ^:private shutdown
   "Tears down the web socket connection."
-  [{:keys [socket]}]
-  (.close socket))
+  [{:keys [socket socket-events]}]
+  (.close socket)
+  (async/close! socket))
 
 (defn ws-widget
   [cursor owner]
