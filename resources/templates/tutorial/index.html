@@ -1,0 +1,118 @@
+<template>
+    <section id="overview">
+        <header>
+            <h2>Overview</h2>
+        </header>
+        <p>
+            Over the course of this tutorial, we will build a simple chat application step by step. In doing so, we will
+            use core.async on both Clojure and Clojurescript. The steps we'll be taking will be:
+        </p>
+        <ol>
+            <li>Download the tutorial project and set up your working environment</li>
+            <li>
+                Once your environment is set up, we'll create a minimal client that will attempt to connect to a server
+                using a WebSocket. The callbacks from the socket will be managed by core.async.
+            </li>
+            <li>
+                Next, the minimal client will get a minimal server. Again, we will use core.async to manage callbacks
+                from the underlying APIs.
+            </li>
+            <li>
+                We augment the client by adding the ability to send messages to the server.
+            </li>
+            <li>
+                Now, the sever responds to the input from the client by echoing it back.
+            </li>
+            <li>
+                Finally, we add the logic to the server to turn it into a true chat server.
+            </li>
+        </ol>
+    </section>
+    <section id="get-the-code">
+        <h2>Get the code</h2>
+
+        <p>
+            The source code for this workshop is available from GitHub at
+            <a href="https://github.com/sattvik/async-workshop">https://github.com/sattvik/async-workshop</a>:
+        </p>
+        <pre><code>$ git clone https://github.com/sattvik/async-workshop</code></pre>
+    </section>
+    <section id="about-the-code">
+        <h2>About the code</h2>
+        <p>
+            The code is packaged as a Leiningen project. This project includes the source code for this web site,
+            including the reference, tutorial instructions, and the chat demo itself. You should be able to run the
+            web site itself using <code>lein run</code>, which will start listening at
+            <a href="http://localhost:9000">http://localhost:9000</a>.
+        </p>
+        <section>
+            <h3>Directory structure</h3>
+
+            <p>
+                The repository is structured as follows:
+            </p>
+            <ul>
+                <li>
+                    <code>src/clj</code> is the root for all of the Clojure code used in the application.
+                </li>
+                <li>
+                    <code>src/cljs</code> is the root for all of the ClojureScript code used in the application.
+                </li>
+                <li>
+                    <code>devel/clj</code> contains code primarily for use during development. This includes browser
+                    REPL support via Austin, namespace reloading, etc.
+                </li>
+                <li>
+                    <code>resources</code> contains various resources used by web application, such as HTML templates,
+                    JavaScript, etc. We won't need to touch any of this as part of the tutorial.
+                </li>
+            </ul>
+        </section>
+        <sestion>
+            <h3>Code structure</h3>
+
+            <p>
+                The code itself is structured into the following namespaces:
+            </p>
+            <ul>
+                <li>
+                    All of the code related to the chat demo/tutorial is under the
+                    <code>async-workshop.chat-demo</code> namespace. The client (ClojureScript) code will be under
+                    <code>async-workshop.chat-demo.client</code>, and the server (Clojure) code will be under
+                    <code>async-workshop.chat-demo.server</code>.
+                </li>
+                <li>
+                    <code>async-workshop.server</code> is the main namespace for most of the web app not related to the
+                    chat demo/tutorial. You won't really need to worry about this cod
+                </li>
+            </ul>
+        </sestion>
+    </section>
+    <section id="develop-the-code">
+        <h2>Develop the code</h2>
+        <p>
+            When Leiningen runs with the <code>dev</code> profile, it will enable various features useful for
+            development. Namely:
+        </p>
+        <ul>
+            <li>
+                You can start/stop the server using the <code>(user/start)</code> and <code>(user/stop)</code>
+                functions.
+            </li>
+            <li>
+                The first time that the server it started, it will create an Austin-based browser REPL environment
+                that will be injected into the served HTML pages. You can access this environment by using
+                <code>@user/repl-env</code>.  For example, you can convert your Leiningen REPL to a ClojureScript by
+                invoking <code>(cemerick.austin.repls/cljs-repl @user/repl-env)</code>.
+            </li>
+            <li>
+                Running <code>lein repl</code> will compile the ClojureScript code as part of the startup process. You
+                may also want to run <code>lein cljsbuild auto</code>.
+            </li>
+        </ul>
+    </section>
+    <section>
+        <p>Ready to get started?</p>
+        <a href="/tutorial/a-minimal-client"><paper-button label="Build a minimal client" class="inverse" raisedbutton></paper-button></a>
+    </section>
+</template>

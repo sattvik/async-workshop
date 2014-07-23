@@ -1,0 +1,115 @@
+<template>
+    <link rel="import" href="/components/paper-shadow/paper-shadow.html">
+    <article>
+        <h2 id="overview">Chat together</h2>
+
+        <p>
+            Well, we have developed our client to the point where it can get messages from the server, but the server
+            isn't yet sending messages between clients. To accomplish this, we will need to accomplish a number of
+            things:
+        </p>
+        <ol>
+            <li>Create a channel through which each client loop can notify all of the others about messages</li>
+            <li>Create a mechanism through which each client loop can get notified about all published messages</li>
+            <li>Finally, process all of the published messages in each client loop</li>
+        </ol>
+    </article>
+
+    <section id="a-publish-channel">
+        <h2>A publish channel</h2>
+
+        <p>
+            The first thing we need to do is create a publishing channel to which all client event loops can put message
+            events in the <code>async-workshop.chat-demo.chatroom</code> namespace. This is fairly straightforward:
+        </p>
+        <pre class="highlightjs">(def publish-channel (async/chan 128))</pre>
+        <p>
+            Here, we use a channel with a small buffer that should be large enough to handle a fair amount of traffic.
+        </p>
+    </section>
+
+    <section id="a-subscribe-channel">
+        <h2>A subscribe channel</h2>
+
+        <p>
+            Well, now that we've created a publishing channel, how should we read from it? With a standard channel,
+            you can only read one value at a time, and once you have read it it's gone. However, we need to be able
+            read the same value over a number of client loops. Fortunately, core.async provides one primitive that
+            helps with this case, <code>mult</code>.
+        </p>
+
+        <section>
+            <h3>Introducing <code>mult</code></h3>
+
+            <p>
+                The <code>mult</code> function takes a channel as an input and returns a special type of channel that
+                has the following properties:
+            </p>
+            <ul>
+                <li>You do not read or write directly to the returned channel.</li>
+                <li>To write to the channel, you just put values into the channel you used when you called
+                    <code>mult</code></li>
+                <li>To read from the mult-channel, you have to use <code>tap</code> and provide a channel into which the
+                    mult-channel will write and you can read
+                </li>
+                <li>Writes to and reads from the mult-channel happen <em>synchronously</em>. This means a new write will
+                    not occur until <em>all</em> channels that have tapped into the mult-channel have been read from.
+                </li>
+                <li>
+                    As a result, when you are no longer interested in a reading from a mult-channel, you must call
+                    <code>untap</code> with the same channel you used during <code>tap</code>.
+                </li>
+            </ul>
+        </section>
+
+        <section>
+            <h3><code>mult</code> in practice</h3>
+
+            <p>
+                Let's create a subscribe channel using <code>mult</code>:
+            </p>
+            <pre class="highlightjs">(def subscribe-channel (async/mult publish-channel))</pre>
+
+            <p>
+                Now, in the event loop function, we need to tap into the subscribe channel using something like:
+            </p>
+            <pre class="highlightjs">(let [message-events (async/channel (async/dropping-buffer 32))
+  (async/tap subscribe-channel message-events)
+  (go
+    ; event loop
+    ))</pre>
+            <p>
+                We do something new when creating our events channel. We use <code>dropping-buffer</code>. This means
+                the generated channel will hold up to 32 values. If those slots fill up, instead of blocking any
+                further writes, it will simply start dropping them. We want this feature because we do not want our
+                mult-channel to get blocked at any point.
+            </p>
+
+            <p>
+                Now the only bit of functionality you will need to use in mult-channel properly is to ensure that when
+                the client disconnects you shut down things down properly:
+            </p>
+            <pre class="highlightjs">(async/untap! subscribe-channel chat-events)
+(async/close! chat-events)</pre>
+        </section>
+    </section>
+
+    <section id="handle-message-events">
+        <h2>Handle message events</h2>
+
+        <p>
+            With your knowledge of <code>mult</code> and <code>alts!</code>, you should now have all the tools you need
+            to modify the event loop to properly send messages between all the different clients.
+        </p>
+    </section>
+
+    <section id="summary">
+        <h2>Summary</h2>
+
+        <p>
+            At this point, you should have some working experience with core.async and the confidence to explore
+            further. Keep an eye on this space, as in the future this tutorial will be amended with further development
+            and introduction of new concepts.
+        </p>
+    </section>
+</template>

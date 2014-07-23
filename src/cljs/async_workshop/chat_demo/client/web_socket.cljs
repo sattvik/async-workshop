@@ -62,7 +62,7 @@
   "Tears down the web socket connection."
   [{:keys [in socket]}]
   (.close socket)
-  (async/close in))
+  (async/close! in))
 
 (defn ws-widget
   [cursor owner]
@@ -82,5 +82,4 @@
       (dom/span nil ""))
     om/IDisplayName
     (display-name [_]
-      "WebSocket manager")))
-
+      "ws-widget")))

@@ -1,0 +1,162 @@
+<template>
+    <link rel="import" href="/components/paper-shadow/paper-shadow.html">
+    <article>
+        <h2 id="overview">A minimal client</h2>
+
+        <p>
+            In this first part of the tutorial, we will add core.async to a ClojureScript application to handle
+            callbacks from a JavaScript application. To do this, we will:
+        </p>
+        <ol>
+            <li>Create an event handler that will input events into an async channel.</li>
+            <li>Once the application is running, we will need to run an event loop that handles events from the
+                socket.
+            </li>
+            <li>Finally, we will shut down the channel when the application is getting shut down.</li>
+        </ol>
+
+
+        <aside class="alert">
+            <paper-shadow z="1"></paper-shadow>
+            Before moving on, be sure that you have successfully set up your development environment. Additionally, you
+            will need to check out the branch <code>a-minimal-client</code> in the repository. This is your starting
+            point.
+        </aside>
+
+        <section id="about-the-app">
+            <h2>About the application</h2>
+
+            <p>
+                While it's not necessary to understand everything about the application, there are a few things that may
+                be helpful to you to know.
+            </p>
+            <ol>
+                <li>
+                    The server uses <a href="https://github.com/cemerick/friend"><code>Friend</code></a> to
+                    ‘authenticate’
+                    a user before accessing the chat room. From that point on, the server knows who the client is.
+                </li>
+                <li>
+                    The application uses the Google Closure library for using WebSockets.
+                </li>
+                <li>
+                    The applicaiton uses <a href="https://github.com/swannodette/om">Om</a> on the client side to render
+                    controls, chat history, and manage the lifetim of the socket. You do not need to understand how to
+                    use Om, however.
+                </li>
+            </ol>
+        </section>
+
+        <section id="socket-init">
+            <h2>Socket initialisation</h2>
+
+            <p>
+                The first bit of code we will take a look at is the <code>make-init-state</code> function in
+                <code>async-workshop.chat-demo.client.web-socket</code>, the namespace containing the code for the Om
+                component that manages the WebSocket used to talk to the server.
+            </p>
+        <pre class="highlightjs">(defn make-init-state
+  []
+  (let [socket (WebSocket.)]
+    (ev/listen socket
+               #js [WebSocket.EventType.CLOSED
+                    WebSocket.EventType.ERROR
+                    WebSocket.EventType.MESSAGE
+                    WebSocket.EventType.OPENED]
+               (fn [e]
+                 (.log js/console (.-type e))))
+    {:socket socket}))</pre>
+            <p>
+                This bit of code constructs a new WebSocket, adds a simple event handler, and returns a map of the local
+                state for the Om component. We will need to make the following changes:
+            </p>
+            <ol>
+                <li>Import the <code>cljs.core.async</code> namespace</li>
+                <li>Create a core.async channel using <code>chan</code></li>
+                <li>Change the event handler to <code>put!</code> events into the channel</li>
+                <li>Add the created channel to the returned state map</li>
+            </ol>
+        </section>
+
+        <section id="about-event-loops">
+            <h2>About event loops</h2>
+
+            <p>
+                Now that the callbacks are inserted into a channel, how do we actually react to them?  There are
+                several ways to take the value out.  What we will want to do is write an event loop that takes values
+                out of the channel and acts on them.  This looks like:
+            </p>
+            <pre class="highlightjs">(async/go
+  (loop []
+    (when-let [value (async/&lt;! channel)
+       ; do something…
+       (recur)))</pre>
+            <p>
+                In ClojureScript, <code>go</code> is a macro and must be required using <code>require-macros</code>
+                from the <code>cljs.core.async.macros</code> namespace.  This <code>(go (loop [] …))</code> is common
+                enough that there is a dedicated <code>go-loop</code> macro.  <code>go</code> runs asynchronously and
+                returns a channel that will produce the result of the <code>go</code> expression.
+            </p>
+            <p>
+                The <code>&lt;!</code> function takes a value from the channel.  This function can only be used in the
+                context context of a <code>go</code>.  This will allow the loop to park until it has a value.  It's
+                nice because it allow you to write code to appear as if the code blocks at that point without actually
+                blocking.
+            </p>
+            <p>
+                We use a <code>when-let</code> because the channel will always produce a non-null value.  If we get a
+                null value, that indicates the channel was closed.  This also means you can not put a null value into
+                a channel.  If there is a chance the channel will produce a <code>false</code> value, you can use
+                <code>when-some</code> instead, which was introduced in Clojure 1.6.
+            </p>
+        </section>
+
+        <section id="write-a-loop">
+            <h2>Write a loop</h2>
+
+            <p>
+                Now that we have covered the basics of writing an event loop using core.async, write one that will be
+                launched from <code>startup</code>.  It should react to the events from the web socket, and inform the
+                user about them by appending them to the chat history. The chat history is part of the client's global
+                state managed by Om (which exists in an atom).  To modify this state, we will use
+                <code>om/transact!</code>, which functions as a combined <code>swap!</code> and <code>update-in</code>.
+            </p>
+            <p>
+                For our example code, you can use something like
+                <code>(om/transact! global-state [:chat-history] #(conj % msg))</code> where <code>global-state</code>
+                is the global application state (the first argument to <code>startup</code>) and <code>msg</code>
+                is the text you are interested appending to the history.  Once you call this, Om will take care of the
+                rest.
+            </p>
+        </section>
+
+        <section id="clean-things-up">
+            <h2>Clean things up</h2>
+
+            <p>
+                Once you have a running event loop, there is one last thing we should probably do.  We should close
+                the channel once we're done with it.  This will cause the event loop we created to terminate cleanly
+                and be garbage-collected.  To do this, all you need to do is call <code>close!</code> on the channel.
+                This idempotent call will cause the channel to longer accept new values, but will allow readers to
+                continue reading values until the channel is exhausted.
+            </p>
+        </section>
+        <section id="summary">
+            <h2>Summary</h2>
+
+            <p>
+                At this point, you should have a client that just puts a message on the page notifying the user that
+                the client has connected to the server.  It is not much, but it is a good start.  You should have
+                learned:
+            </p>
+            <ul>
+                <li>Some of the basics of creating using channels</li>
+                <li>How to write a simple core.async event loop</li>
+            </ul>
+            <p>
+                Now, it's time to apply some of these things to the server side.
+            </p>
+            <a href="/tutorial/a-minimal-server"><paper-button label="Build a minimal server" class="inverse" raisedbutton></paper-button></a>
+        </section>
+    </article>
+</template>

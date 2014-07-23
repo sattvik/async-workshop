@@ -1,0 +1,149 @@
+<template>
+    <link rel="import" href="/components/paper-shadow/paper-shadow.html">
+    <article>
+        <h2 id="overview">Sending a message</h2>
+
+        <p>
+            We now have a server that will respond to the client, but the client cannot send anything.  So let's fix
+            that.  To accomplish this, we will take the following steps:
+        </p>
+        <ol>
+            <li>Add an Om component to get input from the user</li>
+            <li>Create a new channel for input events</li>
+            <li>Manage input events from the event loop</li>
+        </ol>
+
+        <aside class="alert">
+            <paper-shadow z="1"></paper-shadow>
+            Again, to do the tutorial, you need to have set up a development environment. You can also continue
+            working from the previous section, or you can check out the branch <code>sending-a-message</code>
+            in the repository as a starting point.  If you are using the repository, you can skip to
+            <a href="#add-a-message-channel">Add a message channel</a>.
+        </aside>
+
+        <section id="add-an-input">
+            <h2>Add an input component</h2>
+
+            <p>
+                If you are picking up from where you left off in the preivious tutorial, you'll need to add an Om
+                component to get user input.  First, you can create a new namespace,
+                <code>async-workshop.chat-demo.client.input</code>, with the following content:
+            </p>
+            <pre class="highlightjs">(ns async-workshop.chat-demo.client.input
+  (:require [cljs.core.async :as async]
+            [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]))
+
+(defn handle-change
+  [ev owner]
+  (om/set-state! owner :text (.. ev -target -value)))
+
+(defn send-message
+  [app-state owner]
+  (let [msg (om/get-state owner :text)]
+    (.log js/console (str "Sending: " msg))
+    (om/set-state! owner :text "")))
+
+(defn chat-input-widget
+  [app-state owner]
+  (reify
+    om/IDisplayName
+    (display-name [_] "chat-input-widget")
+    om/IInitState
+    (init-state [_]
+      {:text ""})
+    om/IRenderState
+    (render-state [_ state]
+      (dom/div nil
+        (dom/input #js {:type "text"
+                        :ref "chat-input"
+                        :value (:text state)
+                        :onChange #(handle-change % owner)})
+        (dom/button #js {:onClick #(send-message app-state owner)}
+                    "Send")))))</pre>
+
+            <p>
+                There's a lot of implementation details here, but most of them are not relevant to our particular
+                project.  The main thing we will be concerned with is the <code>send-message</code> function.  In
+                particular, we will replace the console log with a mechanism to actually send the message to the
+                server.
+            </p>
+            <p>
+                Next, we will need to instantiate this Om widget in our main namespace,
+                <code>async-workshop.chat-demo.client</code>.  Just import it and add the following top-level form:
+            </p>
+            <pre class="highlightjs">(om/root chat-input-widget app-state
+  {:target (.getElementById js/document "chatInputWidget")})</pre>
+        </section>
+
+
+        <section id="add-a-message-channel">
+            <h2>Add a message channel</h2>
+
+            <p>
+                Now that we have an input control for getting a messge from the user, how do we actually get it out to
+                the server?  One approach would be to put the WebSocket somewhere in the global state and just using
+                it.  However, that makes managing the socket much more difficult.  It would be better to pass the
+                message to the code that already works with the socket.  Naturally, we will use a core.async channel.
+            </p>
+            <p>
+                However, where should we place this channel?  We could place it in a var, i.e. just <code>def</code>
+                it, but we'll be better served by taking advantage of the mechanisms Om provides for managing global
+                state.  To do this, we will add it to the global state map, <code>app-state</code>.
+            </p>
+            <pre class="highlightjs">(def app-state (atom {:chat-history []
+                      :transmit-channel (async/chan)}))</pre>
+        </section>
+
+        <section id="produce-the-message">
+            <h2>Produce the message</h2>
+             <p>
+                 Now that there is a place to put the message, let's modify <code>send-message</code> to the job.  The
+                 code for this is fairly straightforward:
+             </p>
+            <pre class="highlightjs">(async/put! (:transmit-channel @app-state)
+                {:type :tx-message
+                 :value msg})</pre>
+        </section>
+
+        <section id="consume-the-message">
+            <h2>Consume the message</h2>
+
+            <p>
+                Now, that we've placed a message in the channel, how should we get it out?  One option is to create
+                another event loop to handle these messages, but there are a couple of disadvantages to this approach:
+            </p>
+            <ol>
+                <li>It adds complexity to the code</li>
+                <li>Now we have to (potentially) manage access to a shared resource, the WebSocket</li>
+            </ol>
+            <p>
+                So, it's best to consume these events from within our existing event loop.  But how?  Fortunately,
+                core.async provides a handy function, <code>alts!</code>.  <code>alts!</code> takes a vector of channel
+                operations and performs exactly one of these.   Takes are specified by just the channel name, and puts
+                are specified by a vector of the channel name and a value.  The return value of <code>alts!</code>
+                is a vector where the first item is the result of the operation and the second is the channel.
+            </p>
+            <p>
+                Thus, we can deal with both of our channels by replacing the
+                <code>(async/&lt;! socket-events)</code> with <code>(async/alts! socket-events tx-channel)</code>.
+                Then we can deal with the events uniformly regardless of their source.
+            </p>
+            <p>
+                To actually send the message to the server, you will need a reference to the socket.  You can just
+                call the <code>send</code> method on the socket, as in <code>(.send socket message)</code>.
+            </p>
+        </section>
+
+        <section id="summary">
+            <h2>Summary</h2>
+
+            <p>
+                In this section, we've primary learned how to use multiple channels together using <code>alts!</code>.
+                In the next section, we'll start seeing how we can use this technique together with several other
+                new ones to get multiple clients actually talking to each other.
+            </p>
+            <a href="/tutorial/chat-together"><paper-button label="Chat together" class="inverse" raisedbutton></paper-button></a>
+        </section>
+    </article>
+</template>

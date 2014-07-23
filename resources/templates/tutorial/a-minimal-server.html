@@ -1,0 +1,135 @@
+<template>
+    <link rel="import" href="/components/paper-shadow/paper-shadow.html">
+    <article>
+        <h2 id="overview">A minimal server</h2>
+
+        <p>
+            Well, we now have a minimal client, but what about the server? Currently, it only accepts a connection
+            and prints a message. Let's have it do a bit more than that, shall we? In particular, let's create an
+            event loop for each client connection that will:
+        </p>
+        <ul>
+            <li>Greet the client upon connection.</li>
+            <li>Echo back any messages the client sends</li>
+        </ul>
+
+        <aside class="alert">
+            <paper-shadow z="1"></paper-shadow>
+            Again, to do the tutorial, you need to have set up a development environment. You can also continue
+            working from the previous section, or you can check out the branch <code>a-minimal-server</code>
+            in the repository as a starting point.
+        </aside>
+
+        <section id="about-the-server">
+            <h2>About the server</h2>
+
+            <p>
+                The server for the tutorial is a fairly standard Clojure web application built using
+                <a href="https://github.com/ring-clojure/ring">Ring</a>,
+                <a href="https://github.com/weavejester/compojure">Compojure</a>, and
+                <a href="https://github.com/cgrand/enlive/wiki">Enlive</a>. However, unlike Ring's default, it uses
+                <a href="http://http-kit.org/">http-kit</a>. One of the nice thing about http-kit is that its HTTP
+                server supports WebSockets, and adding a WebSocket endpoint is as easy as using a special handler for
+                a Compojure route.
+            </p>
+
+            <p>
+                In our application, this handler can be found at <code>async-workshop.chat-demo.chatroom/chatroom-handler</code>:
+            </p>
+            <pre class="highlightjs">(defn chatroom-handler
+  [req]                                                             ; 1
+  (let [user (get-in req [:session ::friend/identity :current])]    ; 2
+    (web-socket/with-channel req socket                             ; 3
+      (println user "logged in")))) </pre>
+            <ol>
+                <li><code>req</code> is the Ring request</li>
+                <li>We set <code>user</code> to the value of the user's name from the session</li>
+                <li>
+                    <code>with-channel</code> is a macro that will take the request and provide a 'channel' that the
+                    application can use from that point on.  We'll talk about this in more detail in the next section.
+                </li>
+            </ol>
+        </section>
+
+        <section id="server-websockets">
+            <h2>Server WebSockets</h2>
+
+            <aside class="alert">
+                <paper-shadow z="1"></paper-shadow>
+                http-kit uses <i>channel</i> as the name for its unified WebSocket/HTTP Streaming/long-polling API.  To
+                avoid confusion in the tutorial, we will refer to these as <i>WebSockets</i> or <i>sockets</i>.
+            </aside>
+
+            <p>
+                Just like the client-side counterpart, http-kit uses a similar callback-driven approach for working
+                with WebSockets.  The mechanism for setting up these is as follows:
+            </p>
+
+            <ul>
+                <li>
+                    Unlike the client, there is no opened/connected event.  That is implicit in the handler invocation.
+                </li>
+                <li>
+                    To process messages from the client, use <code>org.httpkit.server/on-receive</code>.   This
+                    function takes two arguments: the socket, and a function that takes a single argument containing
+                    the message content.
+                </li>
+                <li>
+                    To know when the client closes the connection, use <code>org.httpkit.server/on-close</code>.  This
+                    takes two arguments: the socket, and a function that takes a single argument describing how the
+                    connection was closed.
+                </li>
+            </ul>
+            <p>
+                Finally, to send a message to the client, just use <code>org.httpkit.server/send!</code>.  This function
+                takes two arguments: the web socket, and the message to send to the socket.
+            </p>
+        </section>
+
+        <section id="implement-the-server">
+            <h2>Implement the server</h2>
+
+            <p>
+                Now, it's your turn to implement the server-side event loop.  Here's a few tips:
+            </p>
+            <ol>
+                <li>In Clojure, all core.async vars are in <code>clojure.core.async</code></li>
+                <li>
+                    When you create the channel, you may want to provide an argument, e.g. <code>(chan 4)</code>.  This
+                    gives the channel a buffer so that requests can back up a small bit before causing the server to
+                    hang.
+                </li>
+                <li>For now, just send the messages to the client directly using <code>send!</code></li>
+            </ol>
+
+            <p>
+                Once you have updated the server, you should be able to reload the chat client page and see the greeting
+                from the server to the user.
+            </p>
+        </section>
+
+        <section id="summary">
+            <h2>Summary</h2>
+
+            <p>
+                There wasn't much new to learn in this section, as most of the ideas from the previous section apply
+                here as well.   However, there are some points for thought/discussion:
+            </p>
+            <ul>
+                <li>
+                    In Clojure there are three ways to put values into a channel: <code>&gt;!</code>,
+                    <code>&gt;!!</code>, and <code>put!</code>.  Do you know the differences?  Which one is missing
+                    from ClojureScript and why?
+                </li>
+                <li>
+                    In Clojure, there are alternatives to using <code>go</code>, namely <code>thread</code> and
+                    <code>thread-call</code>.  Under what circumstances should you use these?
+                </li>
+            </ul>
+            <p>
+                Now, let's get the client to send something more interesting to the server.
+            </p>
+            <a href="/tutorial/sending-a-message"><paper-button label="Sending a message" class="inverse" raisedbutton></paper-button></a>
+        </section>
+    </article>
+</template>

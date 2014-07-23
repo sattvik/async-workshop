@@ -74,6 +74,7 @@
   (dorun (map (comp enlive-reload/auto-reload find-ns)
               '[async-workshop.server.pages
                 async-workshop.server.pages.reference
+                async-workshop.server.tutorial
                 async-workshop.chat-demo.pages]))
   (swap! repl-env init-repl-env)
   (swap! server start-server))

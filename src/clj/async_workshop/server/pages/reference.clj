@@ -22,7 +22,7 @@
                    {:label (name (:name meta))
                     :anchor (:id meta)})
                  async-vars)}
-   {:label "Patterns"
+   #_{:label "Patterns"
     :icon "view-quilt"
     :base-uri "/reference/patterns"
     :items []}])
