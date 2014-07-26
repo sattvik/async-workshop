@@ -36,8 +36,9 @@
   (assoc response :body
          (enlive/emit*
            (enlive/at (enlive/html-snippet (apply str body))
-                      [:body] (enlive/append
-                                (enlive/html [:script (browser-connected-repl-js)]))))))
+                      [:script#inject-austin]
+                        (enlive/content
+                          (browser-connected-repl-js))))))
 
 (defn wrap-austin
   [handler]
