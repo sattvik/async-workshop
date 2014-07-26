@@ -64,7 +64,7 @@
   "Tears down the web socket connection."
   [{:keys [socket socket-events]}]
   (.close socket)
-  (async/close! socket))
+  (async/close! socket-events))
 
 (defn ws-widget
   [cursor owner]
