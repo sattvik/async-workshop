@@ -35,6 +35,7 @@
 (defn main-page
   [req]
   (workshop-page
+    req
     {:title "Reference"
      :subtitle "Don't panic."
      :current-section "reference"
@@ -77,6 +78,7 @@
 (defn apidocs-page
   [req]
   (workshop-page
+    req
     {:title "API Documenation"
      :subtitle "core.async in depth"
      :current-section "reference"

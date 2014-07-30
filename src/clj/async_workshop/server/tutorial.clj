@@ -79,6 +79,7 @@
 (defn main-page
   [request]
   (workshop-page
+    request
     {:title "The core.async tutorial"
      :subtitle "Learn by doing"
      :content (main-page-content)
@@ -91,6 +92,7 @@
 (defn minimal-client-page
   [request]
   (workshop-page
+    request
     {:title "A minimal client"
      :subtitle "An introduction to core.async"
      :content (minimal-client-content)
@@ -103,6 +105,7 @@
 (defn minimal-server-page
   [request]
   (workshop-page
+    request
     {:title "A minimal server"
      :subtitle "Event loops on the server"
      :content (minimal-server-content)
@@ -115,6 +118,7 @@
 (defn sending-a-message-page
   [request]
   (workshop-page
+    request
     {:title "Sending a message"
      :subtitle "Interact with our echo server"
      :content (sending-a-message-content)
@@ -127,6 +131,7 @@
 (defn chat-together-page
   [request]
   (workshop-page
+    request
     {:title "Chat together"
      :subtitle "Because talking to yourself gets boring"
      :content (chat-together-content)
