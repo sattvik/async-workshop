@@ -1,7 +1,7 @@
 (ns async-workshop.server
   (:gen-class)
   (:require [compojure.handler :refer [site]]
-            [async-workshop.server.routes :refer [app]]
+            [async-workshop.server.app :refer [app]]
             [org.httpkit.server :refer [run-server]]))
 
 (def default-options

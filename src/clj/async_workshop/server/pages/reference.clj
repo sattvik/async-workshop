@@ -1,8 +1,9 @@
 (ns async-workshop.server.pages.reference
   (:require [async-workshop.server.navmenu :as navmenu]
-            [async-workshop.server.pages :refer [workshop-page]]
+            [async-workshop.server.workshop-page :refer [defpage]]
             [clojure.core.async :as async]
             [clojure.string :as string]
+            [compojure.core :refer [defroutes GET]]
             [net.cgrand.enlive-html :as el :refer [deftemplate defsnippet]]))
 
 (def clojure-only-async-vars '#{<!! >!! alts!! alt!! ioc-alts! thread-call thread})
@@ -27,20 +28,12 @@
     :base-uri "/reference/patterns"
     :items []}])
 
-(defsnippet main-page-content "templates/reference/index.html"
-  [:body]
-  []
-  [:body] el/unwrap)
 
-(defn main-page
-  [req]
-  (workshop-page
-    req
-    {:title "Reference"
-     :subtitle "Don't panic."
-     :current-section "reference"
-     :content (main-page-content)
-     :nav-menu (navmenu/menu-snippet nav-menu req)}))
+(defpage main-page
+  "templates/reference/index.html"
+  nav-menu
+  {:title "Reference"
+   :subtitle "Don't panic."})
 
 (defn render-invocation
   [name arglist]
@@ -62,25 +55,22 @@
        (map (fn [p] [:p p]))
        (el/html)))
 
-(defsnippet apidocs-page-content "templates/reference/apidocs.html"
-  [:body]
-  []
-  [:body] el/unwrap
-  [:async-workshop-clojuredoc] (el/clone-for [{:keys [doc id name macro arglists]} async-vars]
-                                 (el/do->
-                                   (el/set-attr :id id)
-                                   (el/set-attr :varname name)
-                                   (el/set-attr :ismacro macro)
-                                   (el/set-attr :arglists (render-invocations name arglists))
-                                   (el/set-attr :clojureonly (clojure-only-async-vars name))
-                                   (el/content (parse-doc doc)))))
+(defpage apidocs-page
+  "templates/reference/apidocs.html"
+  nav-menu
+  {:title "API Documenation"
+   :subtitle "core.async in depth"}
+  [_]
+  [:async-workshop-clojuredoc]
+    (el/clone-for [{:keys [doc id name macro arglists]} async-vars]
+                  (el/do->
+                    (el/set-attr :id id)
+                    (el/set-attr :varname name)
+                    (el/set-attr :ismacro macro)
+                    (el/set-attr :arglists (render-invocations name arglists))
+                    (el/set-attr :clojureonly (clojure-only-async-vars name))
+                    (el/content (parse-doc doc)))))
 
-(defn apidocs-page
-  [req]
-  (workshop-page
-    req
-    {:title "API Documenation"
-     :subtitle "core.async in depth"
-     :current-section "reference"
-     :content (apidocs-page-content)
-     :nav-menu (navmenu/menu-snippet nav-menu req)}))
+(defroutes routes
+  (GET "/" request main-page)
+  (GET "/apidocs" request apidocs-page))
