@@ -1,8 +1,6 @@
 (ns async-workshop.server.tutorial
-  (:require [async-workshop.server.navmenu :as navmenu]
-            [async-workshop.server.pages :refer [workshop-page]]
-            [compojure.core :refer [defroutes GET]]
-            [net.cgrand.enlive-html :as el :refer [defsnippet]]))
+  (:require [async-workshop.server.workshop-page :refer [defpage]]
+            [compojure.core :refer [defroutes GET]]))
 
 (def tutorial-menu
   [{:label "Get started"
@@ -72,70 +70,35 @@
             {:label "Summary"
              :anchor "summary"}]}])
 
-(defsnippet main-page-content "templates/tutorial/index.html"
-  [:template :> el/any-node]
-  [])
+(defpage main-page
+  "templates/tutorial/index.html"
+  tutorial-menu
+  {:title "The core.async tutorial"
+   :subtitle "Learn by doing"})
 
-(defn main-page
-  [request]
-  (workshop-page
-    request
-    {:title "The core.async tutorial"
-     :subtitle "Learn by doing"
-     :content (main-page-content)
-     :nav-menu (navmenu/menu-snippet tutorial-menu request)}))
+(defpage minimal-client-page
+  "templates/tutorial/a-minimal-client.html"
+  tutorial-menu
+  {:title "A minimal client"
+   :subtitle "An introduction to core.async"})
 
-(defsnippet minimal-client-content "templates/tutorial/a-minimal-client.html"
-  [:template :> el/any-node]
-  [])
+(defpage minimal-server-page
+  "templates/tutorial/a-minimal-server.html"
+  tutorial-menu
+  {:title "A minimal server"
+   :subtitle "Event loops on the server"})
 
-(defn minimal-client-page
-  [request]
-  (workshop-page
-    request
-    {:title "A minimal client"
-     :subtitle "An introduction to core.async"
-     :content (minimal-client-content)
-     :nav-menu (navmenu/menu-snippet tutorial-menu request)}))
+(defpage sending-a-message-page
+  "templates/tutorial/sending-a-message.html"
+  tutorial-menu
+  {:title "Sending a message"
+   :subtitle "Interact with our echo server"})
 
-(defsnippet minimal-server-content "templates/tutorial/a-minimal-server.html"
-  [:template :> el/any-node]
-  [])
-
-(defn minimal-server-page
-  [request]
-  (workshop-page
-    request
-    {:title "A minimal server"
-     :subtitle "Event loops on the server"
-     :content (minimal-server-content)
-     :nav-menu (navmenu/menu-snippet tutorial-menu request)}))
-
-(defsnippet sending-a-message-content "templates/tutorial/sending-a-message.html"
-  [:template :> el/any-node]
-  [])
-
-(defn sending-a-message-page
-  [request]
-  (workshop-page
-    request
-    {:title "Sending a message"
-     :subtitle "Interact with our echo server"
-     :content (sending-a-message-content)
-     :nav-menu (navmenu/menu-snippet tutorial-menu request)}))
-
-(defsnippet chat-together-content "templates/tutorial/chat-together.html"
-  [:template :> el/any-node]
-  [])
-
-(defn chat-together-page
-  [request]
-  (workshop-page
-    request
-    {:title "Chat together"
-     :subtitle "Because talking to yourself gets boring"
-     :content (chat-together-content)
-     :nav-menu (navmenu/menu-snippet tutorial-menu request)}))
+(defpage chat-together-page
+  "templates/tutorial/chat-together.html"
+  tutorial-menu
+  {:title "Chat together"
+   :subtitle "Because talking to yourself gets boring"})
 
 (defroutes routes
   (GET "/" request main-page)

@@ -1,5 +1,5 @@
 (ns user
-  (:require [async-workshop.server.routes :refer [app]]
+  (:require [async-workshop.server.app :refer [app]]
             [cemerick.austin :as austin]
             [cemerick.austin.repls :refer [browser-connected-repl-js browser-repl-env]]
             [clojure.java.io :as jio]
