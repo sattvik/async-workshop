@@ -20,3 +20,29 @@ A note for OS X users
 ---------------------
 
 It appears that this tutorial requires Java 7 or newer, but the default is Java 6.  Please update your Java.
+
+
+Legal stuff
+-----------
+
+Copyright © 2014 Daniel Solano Gómez
+All rights reserved.
+
+Except as otherwise noted:
+
+* All code is licensed under the [Eclipse Public License 1.0][EPL-1.0]
+* All documentation is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][CC-BY-SA-4.0]
+
+  [EPL-1.0]: http://www.eclipse.org/legal/epl-v10.html
+  [CC-BY-SA-4.0]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+
+### Included works
+
+* Roboto font by Christian Robertson and licensed under the [Apache License 2.0][AL-2.0]
+* Inconsolata font by Raph Levien and licensed under the [Open Font License][OFL]
+* Polymer is licensed under the [Polymer BSD license][PolymerBSD]
+* React is licensed under the [Apache License 2.0][AL-2.0]
+
+  [AL-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
+  [OFL]: http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
+  [PolymerBSD]: http://polymer.github.io/LICENSE.txt
