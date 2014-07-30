@@ -54,7 +54,7 @@
 (defn start-server
   [server]
   (if-not server
-    (run-server (-> (site #'app)
+    (run-server (-> (site (app {:enable-chat? true}))
                     (wrap-austin)
                     (reload/wrap-reload {:dirs ["src/clj" "devel/clj"]}))
                 options)
