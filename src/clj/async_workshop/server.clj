@@ -17,6 +17,6 @@
 
 (defn -main [& args]
   (let [options (merge default-options (parse-args args))]
-    (let [handler (site #'app)]
+    (let [handler (site (app {}))]
       (run-server handler options))
   (println "async-workshop now listening on port" (:port options))))
