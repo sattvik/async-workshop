@@ -47,11 +47,11 @@
              :anchor "overview"}
             {:label "Add an input"
              :anchor "add-an-input"}
-            {:label "Add a message channel"
+            {:label "A message channel"
              :anchor "add-a-message-channel"}
-            {:label "Produce the message"
+            {:label "Produce messages"
              :anchor "produce-the-message"}
-            {:label "Consume the message"
+            {:label "Consume messages"
              :anchor "consume-the-message"}
             {:label "Summary"
              :anchor "summary"}]}
@@ -63,9 +63,9 @@
              :anchor "a-publish-channel"}
             {:label "A subscribe channel"
              :anchor "a-subscribe-channel"}
-            {:label "Add a message channel"
+            {:label "A message channel"
              :anchor "add-a-message-channel"}
-            {:label "Handle message events"
+            {:label "Handle messages"
              :anchor "handle-message-events"}
             {:label "Summary"
              :anchor "summary"}]}])
