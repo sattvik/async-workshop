@@ -10,6 +10,7 @@
 (defn landing-page
   [req]
   (workshop-page
+    req
     {:title "Chat demo"
      :subtitle "Chat with core.async"
      :content (landing-page-content req)}))
@@ -21,6 +22,7 @@
 (defn login-page
   [req]
   (workshop-page
+    req
     {:title "Chat demo"
      :subtitle "Login"
      :content (login-page-content req)}))
@@ -33,6 +35,7 @@
 (defn chatroom
   [req]
   (workshop-page
+    req
     {:tatle "Chat room"
      :compact? true
      :content (chatroom-content
