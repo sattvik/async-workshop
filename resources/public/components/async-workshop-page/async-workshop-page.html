@@ -8,33 +8,45 @@
 <link rel="import" href="../paper-item-fixed/paper-item.html">
 
 <polymer-element name="async-workshop-page" attributes="pageTitle pageSubtitle currentSection collapsible enableChat">
-  <template>
-    <link rel="stylesheet" type="text/css" href="async-workshop-page.css">
-    <core-scaffold id="pageScaffold" mode="{{collapsible ? 'waterfall-tall' : 'seamed'}}">
-      <core-header-panel navigation flex mode="seamed">
-        <core-toolbar id="navHeader" layout vertical center>
-          <a href="/"><paper-button label="core.async/go"></paper-button></a>
-        </core-toolbar>
-        <content id="navMenu" select="nav">
-      </core-header-panel>
-      <div tool flex></div>
-      <h1 id="pageTitle" tool class="middle">{{pageTitle}}</h1>
-      <div id="pageSubtitle" tool class="bottom">{{pageSubtitle}}</div>
-      <a tool href="/tutorial">
-        <paper-button label="Tutorial" class="header-button" active="{{isActiveSection('/tutorial')}}"></paper-button>
-      </a>
-      <a tool href="/reference">
-        <paper-button label="Reference" class="header-button" active="{{isActiveSection('/reference')}}"></paper-button>
-      </a>
-      <template if="{{enableChat === 'true'}}">
-	<a tool href="/chat-demo">
-	  <paper-button label="Chat Demo" class="header-button" active="{{isActiveSection('/chat-demo')}}"></paper-button>
-	</a>
-      </template>
-      <div id="pageContent">
-        <content select="*"></content>
-      </div>
-    </core-scaffold>
-  </template>
-  <script src="async-workshop-page.js"></script>
+    <template>
+        <link rel="stylesheet" type="text/css" href="async-workshop-page.css">
+        <core-scaffold id="pageScaffold" mode="{{collapsible ? 'waterfall-tall' : 'seamed'}}">
+            <core-header-panel navigation flex mode="seamed">
+                <core-toolbar id="navHeader" layout vertical center>
+                    <a href="/">
+                        <paper-button label="core.async/go"></paper-button>
+                    </a>
+                </core-toolbar>
+                <content id="navMenu" select="nav">
+            </core-header-panel>
+            <div tool flex></div>
+            <h1 id="pageTitle" tool class="middle">{{pageTitle}}</h1>
+
+            <div id="pageSubtitle" tool class="bottom">{{pageSubtitle}}</div>
+            <a tool href="/tutorial">
+                <paper-button label="Tutorial" class="header-button" active="{{isActiveSection('/tutorial')}}"></paper-button>
+            </a>
+            <a tool href="/reference">
+                <paper-button label="Reference" class="header-button" active="{{isActiveSection('/reference')}}"></paper-button>
+            </a>
+            <template if="{{enableChat === 'true'}}">
+                <a tool href="/chat-demo">
+                    <paper-button label="Chat Demo" class="header-button" active="{{isActiveSection('/chat-demo')}}"></paper-button>
+                </a>
+            </template>
+            <div id="pageContent">
+                <content select="*"></content>
+            </div>
+
+            <footer id="pageFooter">
+                <p id="copyright">
+                    Copyright © 2014 Daniel Solano Gómez. Code licensed under the
+                    <a href="http://www.eclipse.org/legal/epl-v10.html" target="_blank">Eclipse Public License 1.0</a>.
+                    Documentation licensed under
+                    <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+                </p>
+            </footer>
+        </core-scaffold>
+    </template>
+    <script src="async-workshop-page.js"></script>
 </polymer-element>
