@@ -3,11 +3,12 @@
             [net.cgrand.enlive-html :as enlive :refer [deftemplate defsnippet]]))
 
 (deftemplate workshop-page "templates/workshop-page.html"
-  [{:keys [title subtitle compact? content nav-menu] :as page-info}]
+  [request {:keys [title subtitle compact? content nav-menu] :as page-info}]
   [:async-workshop-page] (enlive/do->
                            (enlive/set-attr :collapsible (not compact?))
                            (enlive/set-attr :pageTitle title)
                            (enlive/set-attr :pageSubtitle subtitle)
+                           (enlive/set-attr :enableChat (get-in request [:async-workshop :enable-chat?] false))
                            (enlive/content content nav-menu))
   [:head :title] (enlive/content (str "Get going with core.async: " title)))
 
@@ -30,6 +31,7 @@
 (defn main-page
   [req]
   (workshop-page
+    req
     {:title "Get going with core.asyc"
      :subtitle "Lambda Jam Chicago 2014"
      :content (welcome-page-content)
@@ -38,6 +40,7 @@
 (defn not-found
   [req]
   (workshop-page
+    req
     {:title "Not found"
      :compact? true
      :content (enlive/html [:p "I’m sorry, but there isn’t anything here for you."])
