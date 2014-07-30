@@ -1,4 +1,4 @@
-(ns async-workshop.server.routes
+(ns async-workshop.server.app
   (:require [async-workshop.chat-demo.server.routes :refer [chat-app]]
             [async-workshop.server.pages :as pages]
             [async-workshop.server.pages.reference :as reference]
@@ -7,9 +7,8 @@
             [compojure.route :as route]))
 
 (defroutes main-routes
-  (GET "/" request (pages/main-page request))
-  (GET "/reference" request (reference/main-page request))
-  (GET "/reference/apidocs" request (reference/apidocs-page request))
+  (GET "/" request pages/main-page)
+  (context "/reference" request reference/routes)
   (context "/tutorial" request tutorial/routes)
   (route/resources "/")
   (route/not-found pages/not-found))
