@@ -1,3 +1,12 @@
+<!--
+  ~ Copyright © 2014 Daniel Solano Gómez.
+  ~
+  ~ This program is provided under the terms of the Eclipse Public License 1.0
+  ~ <http://www.eclipse.org/org/documents/epl-v10.html>.  Any use, reproduction,
+  ~ or distribution of this program constitutes recipient's acceptance of this
+  ~ license.
+  -->
+
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="/components/paper-shadow/paper-shadow.html">
 
@@ -14,7 +23,7 @@
           <span id="clojureOnly">Clojure only</span>
         </template>
       </div>
-      <pre id="invocationList"><code>{{argLists}}</code></pre>
+      <pre id="invocationList" class="brush: clojure">{{argLists | formatArgLists}}</pre>
       <div id="docBody">
         <content></content>
       </div>
