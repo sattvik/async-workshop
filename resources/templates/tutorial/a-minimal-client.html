@@ -1,3 +1,10 @@
+<!--
+  ~ Copyright © 2014 Daniel Solano Gómez.
+  ~
+  ~ This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  ~ International License <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
+  -->
+
 <template>
     <link rel="import" href="/components/paper-shadow/paper-shadow.html">
     <article>
@@ -55,7 +62,7 @@
                 <code>async-workshop.chat-demo.client.web-socket</code>, the namespace containing the code for the Om
                 component that manages the WebSocket used to talk to the server.
             </p>
-        <pre class="highlightjs">(defn make-init-state
+        <pre class="brush: clojure">(defn make-init-state
   []
   (let [socket (WebSocket.)]
     (ev/listen socket
@@ -86,7 +93,7 @@
                 several ways to take the value out.  What we will want to do is write an event loop that takes values
                 out of the channel and acts on them.  This looks like:
             </p>
-            <pre class="highlightjs">(async/go
+            <pre class="brush: clojure">(async/go
   (loop []
     (when-let [value (async/&lt;! channel)
        ; do something…

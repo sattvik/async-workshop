@@ -1,3 +1,10 @@
+<!--
+  ~ Copyright © 2014 Daniel Solano Gómez.
+  ~
+  ~ This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  ~ International License <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
+  -->
+
 <template>
     <link rel="import" href="/components/paper-shadow/paper-shadow.html">
     <article>
@@ -36,11 +43,11 @@
             <p>
                 In our application, this handler can be found at <code>async-workshop.chat-demo.chatroom/chatroom-handler</code>:
             </p>
-            <pre class="highlightjs">(defn chatroom-handler
+            <pre class="brush: clojure">(defn chatroom-handler
   [req]                                                             ; 1
   (let [user (get-in req [:session ::friend/identity :current])]    ; 2
     (web-socket/with-channel req socket                             ; 3
-      (println user "logged in")))) </pre>
+      (println user "logged in"))))</pre>
             <ol>
                 <li><code>req</code> is the Ring request</li>
                 <li>We set <code>user</code> to the value of the user's name from the session</li>
