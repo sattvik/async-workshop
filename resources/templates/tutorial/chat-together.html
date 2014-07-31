@@ -1,3 +1,10 @@
+<!--
+  ~ Copyright © 2014 Daniel Solano Gómez.
+  ~
+  ~ This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  ~ International License <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
+  -->
+
 <template>
     <link rel="import" href="/components/paper-shadow/paper-shadow.html">
     <article>
@@ -22,7 +29,7 @@
             The first thing we need to do is create a publishing channel to which all client event loops can put message
             events in the <code>async-workshop.chat-demo.chatroom</code> namespace. This is fairly straightforward:
         </p>
-        <pre class="highlightjs">(def publish-channel (async/chan 128))</pre>
+        <pre class="brush: clojure">(def publish-channel (async/chan 128))</pre>
         <p>
             Here, we use a channel with a small buffer that should be large enough to handle a fair amount of traffic.
         </p>
@@ -68,12 +75,12 @@
             <p>
                 Let's create a subscribe channel using <code>mult</code>:
             </p>
-            <pre class="highlightjs">(def subscribe-channel (async/mult publish-channel))</pre>
+            <pre class="brush: clojure">(def subscribe-channel (async/mult publish-channel))</pre>
 
             <p>
                 Now, in the event loop function, we need to tap into the subscribe channel using something like:
             </p>
-            <pre class="highlightjs">(let [message-events (async/channel (async/dropping-buffer 32))
+            <pre class="brush: clojure">(let [message-events (async/channel (async/dropping-buffer 32))
   (async/tap subscribe-channel message-events)
   (go
     ; event loop
@@ -89,7 +96,7 @@
                 Now the only bit of functionality you will need to use in mult-channel properly is to ensure that when
                 the client disconnects you shut down things down properly:
             </p>
-            <pre class="highlightjs">(async/untap! subscribe-channel chat-events)
+            <pre class="brush: clojure">(async/untap! subscribe-channel chat-events)
 (async/close! chat-events)</pre>
         </section>
     </section>

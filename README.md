@@ -42,7 +42,10 @@ Except as otherwise noted:
 * Inconsolata font by Raph Levien and licensed under the [Open Font License][OFL]
 * Polymer is licensed under the [Polymer BSD license][PolymerBSD]
 * React is licensed under the [Apache License 2.0][AL-2.0]
+* SyntaxHighlighter is licensed under the [MIT License][MIT]
+* inc-clojure-brush is licensed uner the [Eclipse Publice License 1.0][EPL-1.0]
 
   [AL-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
   [OFL]: http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
   [PolymerBSD]: http://polymer.github.io/LICENSE.txt
+  [MIT]: http://opensource.org/licenses/MIT
