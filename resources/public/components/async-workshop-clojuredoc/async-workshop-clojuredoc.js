@@ -1,1 +1,1 @@
-Polymer("async-workshop-clojuredoc",{created:function(){"use strict";this.argLists=[]},domReady:function(){"use strict";hljs.highlightBlock(this.$.invocationList)}});
+Polymer("async-workshop-clojuredoc",{created:function(){"use strict";this.argLists=[]},formatArgLists:function(a){"use strict";for(var b=a[0],c=1;c<a.length;++c)b+="\n"+a[c];return b},domReady:function(){"use strict";var a={gutter:!1,"tab-size":2,toolbar:!1};SyntaxHighlighter.highlight(a,this.$.invocationList)}});

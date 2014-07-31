@@ -1,3 +1,12 @@
+;
+; Copyright © 2014 Daniel Solano Gómez.
+;
+; This program is provided under the terms of the Eclipse Public License 1.0
+; <http://www.eclipse.org/org/documents/epl-v10.html>.  Any use, reproduction,
+; or distribution of this program constitutes recipient's acceptance of this
+; license.
+;
+
 (ns async-workshop.server.pages.reference
   (:require [async-workshop.server.navmenu :as navmenu]
             [async-workshop.server.workshop-page :refer [defpage]]
@@ -37,16 +46,19 @@
 
 (defn render-invocation
   [name arglist]
-  (->> (concat ["(" name " "]
+  (->> (concat ["\"(" name]
+               (if (seq arglist) [" "] [])
                (interpose " " arglist)
-               [")"])
+               [")\""])
        (apply str)))
 
 (defn render-invocations
   [name arglists]
-  (->> (map (partial render-invocation name) arglists)
-       (interpose \newline)
-       (apply str)))
+  (str \[
+       (->> (map (partial render-invocation name) arglists)
+            (interpose ", ")
+            (apply str))
+       \]))
 
 (defn parse-doc
   [doc]
