@@ -12,7 +12,7 @@
 
         <p>
             Well, we have developed our client to the point where it can get messages from the server, but the server
-            isn't yet sending messages between clients. To accomplish this, we will need to accomplish a number of
+            isn’t yet sending messages between clients. To accomplish this, we will need to accomplish a number of
             things:
         </p>
         <ol>
@@ -39,10 +39,10 @@
         <h2>A subscribe channel</h2>
 
         <p>
-            Well, now that we've created a publishing channel, how should we read from it? With a standard channel,
-            you can only read one value at a time, and once you have read it it's gone. However, we need to be able
+            Well, now that we’ve created a publishing channel, how should we read from it? With a standard channel,
+            you can only read one value at a time, and once you have read it it’s gone. However, we need to be able
             read the same value over a number of client loops. Fortunately, core.async provides one primitive that
-            helps with this case, <code>mult</code>.
+            helps with this case, <code><a href="/reference/apidocs#mult">mult</a></code>.
         </p>
 
         <section>
@@ -54,17 +54,23 @@
             </p>
             <ul>
                 <li>You do not read or write directly to the returned channel.</li>
-                <li>To write to the channel, you just put values into the channel you used when you called
-                    <code>mult</code></li>
-                <li>To read from the mult-channel, you have to use <code>tap</code> and provide a channel into which the
-                    mult-channel will write and you can read
+                <li>
+                    To write to the channel, you just put values into the channel you used when you called
+                    <code>mult</code>. You cannot put into the mult-channel directly.
                 </li>
-                <li>Writes to and reads from the mult-channel happen <em>synchronously</em>. This means a new write will
+                <li>
+                    To read from the mult-channel, you have to use <code><a href="/reference/apidocs#tap">tap</a></code>
+                    and provide a channel into which the mult-channel will write and you can read. Again, you cannot
+                    read from the mult-channel directly.
+                </li>
+                <li>
+                    Writes to and reads from the mult-channel happen <em>synchronously</em>. This means a new write will
                     not occur until <em>all</em> channels that have tapped into the mult-channel have been read from.
                 </li>
                 <li>
                     As a result, when you are no longer interested in a reading from a mult-channel, you must call
-                    <code>untap</code> with the same channel you used during <code>tap</code>.
+                    <code><a href="/reference/apidocs#untap">untap</a></code> with the same channel you used during
+                    <code>tap</code>.
                 </li>
             </ul>
         </section>
@@ -73,23 +79,25 @@
             <h3><code>mult</code> in practice</h3>
 
             <p>
-                Let's create a subscribe channel using <code>mult</code>:
+                Let’s create a subscribe channel using <code>mult</code>:
             </p>
+
             <pre class="brush: clojure">(def subscribe-channel (async/mult publish-channel))</pre>
 
             <p>
                 Now, in the event loop function, we need to tap into the subscribe channel using something like:
             </p>
-            <pre class="brush: clojure">(let [message-events (async/channel (async/dropping-buffer 32))
+            <pre class="brush: clojure">(let [message-events (async/chan (async/dropping-buffer 32))
   (async/tap subscribe-channel message-events)
   (go
     ; event loop
     ))</pre>
             <p>
-                We do something new when creating our events channel. We use <code>dropping-buffer</code>. This means
-                the generated channel will hold up to 32 values. If those slots fill up, instead of blocking any
-                further writes, it will simply start dropping them. We want this feature because we do not want our
-                mult-channel to get blocked at any point.
+                We do something new when creating our events channel. We use a
+                <code><a href="/reference/apidocs#dropping_buffer">dropping-buffer</a></code>. This means the generated
+                channel will hold up to 32 values. If those slots fill up, instead of blocking any further writes, it
+                will simply start dropping them. We want this feature because we do not want our mult-channel to get
+                blocked at any point.
             </p>
 
             <p>
