@@ -1,0 +1,338 @@
+<!--
+  ~ Copyright © 2014 Daniel Solano Gómez.
+  ~
+  ~ This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  ~ International License <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
+  -->
+
+<template>
+<article id="about">
+<h2>About core.async</h2>
+
+<p>
+    Clojure and ClojureScript programmers now have another tool for managing concurrency and callback hell with
+    core.async. This library takes a fundamentally different approach from existing tools such as atoms, vars,
+    refs, and agents.
+</p>
+
+<p>
+    The historical roots of core.async trace all the way back to Hoare’s <a href="http://usingcsp.com/">Communicating
+    Sequential Processes</a> (CSP). One of the most immediate inspirations for core.async is the
+    <a href="http://golang.org/">Go programming language</a>. Fundamentally, one of the principles behind CSP is
+    that coordination between concurrent processes is achieved via message-passing. In core.async, this achieved
+    through the use of queue-like <em>channels</em>.
+</p>
+
+<p>
+    In this section of the reference, we will examine the basic building blocks that make up core.async. We will
+    start with channels and buffers, learn about the different types of channel operations, and finally learn
+    about <code>go</code> expressions.
+</p>
+
+<section id="channels">
+    <h2>Channels</h2>
+
+    <p>
+        Channels lie at the very heart of core.async, so what are they? <em>Channels are a first-class means of
+        communicating between logical threads of execution within an application.</em> What does that mean?
+        Let’s break it down:
+    </p>
+
+    <dl>
+        <dt>Channels are a first class…</dt>
+        <dd>
+            Just as functions are first class in Clojure and ClojureScript, so are channels. You can pass them
+            around as arguments to functions, you can even place them inside other channels.
+        </dd>
+
+        <dt>…means of communicating…</dt>
+        <dd>
+            At a basic level, channels operate much like zero-length queues. You can either put a value into a
+            channel or take a value out. However, for a put or a take to succeed, you must have a corresponding
+            take or put (though channels can also be <a href="#buffered-channels">buffered</a>). However, <em>channels
+            are not queues</em> and <a href="#channel-ops">operations on channels</a> are more flexible than
+            those on traditional queues.
+        </dd>
+
+        <dt>…between logical threads of execution…</dt>
+        <dd>
+            While channels are certainly useful for coordinating between threads, they do no require actual
+            OS-level threads to work. They are usable within ClojureScript, which has only a single thread of
+            execution. In fact, the most common use case does not require dedicated threads.
+        </dd>
+
+        <dt>…within an application.</dt>
+        <dd>
+            Channels are not a mechanism that facilitates inter-process communication or distributed computing.
+            core.async only works within a single virtual machine. However, you can use channels as a means of
+            organising information flows to/from remote machines.
+        </dd>
+    </dl>
+
+    <p>
+        To create a channel, simply use the <code><a href="apidocs#chan">chan</a></code> function. However, it
+        is also possible to create buffered channels, so let’s look at that next.
+    </p>
+</section>
+
+<section id="buffered-channels">
+    <h2>Buffered channels</h2>
+
+    <p>
+        As mentioned above, by default channels are like zero-length queues, requiring a synchronous transfer
+        from a producer to a consumer. However, what if you need a little more flexibility? Perhaps you would
+        like to allow a backlog of work so that producers can continue working without waiting for a
+        corresponding consumer?
+    </p>
+
+    <p>
+        Unsurprisingly, core.async gives you mechanisms for accomplishing this task. The
+        <code><a href="apidocs#chan">chan</a></code> function optionally takes an argument that specifies a
+        buffer for a channel. Additionally, core.async provides a few different buffer options:
+    </p>
+
+    <ol>
+        <li>
+            You can create fixed-size buffers using <code><a href="apidocs#buffer">(buffer
+            <em>n</em>)</a></code>. As a shortcut, you can simply specify a buffer size as an argument to
+            <code>chan</code>,
+            i.e. <code>(chan (buffer 4))</code> is equivalent to <code>(chan 4)</code>. When using a fixed
+            buffer of size <em>n</em>, the channel will take up to <em>n</em> values before blocking any
+            producers. Once the buffer is full, a consumer must consume a value from the channel before
+            producers can continue.
+        </li>
+        <li>
+            You can also use a <code><a href="apidocs#dropping_buffer">dropping-buffer</a></code>. A dropping
+            buffer functions largely like a fixed buffer, except that once the buffer is full, instead of
+            causing producers to wait, producers will immediately succeed but any new produced values will
+            simply be dropped and lost.
+        </li>
+        <li>
+            Finally, there is the <code><a href="apidocs#sliding_buffer">sliding-buffer</a></code>. Like the
+            dropping buffer, a sliding buffer will not block producers once it is full. Unlike a dropping
+            buffer, a sliding buffer will drop the <em>oldest</em> values instead of the <em>newest</em> values.
+        </li>
+    </ol>
+
+    <p>
+        Note that core.async does not provide any sort of unbounded buffer. This should be considered a good
+        thing as there really is not such a thing as truly unbounded buffer. At some point you will run out of
+        memory, and then things can fail unpredictably.
+    </p>
+
+    <p>
+        To get a feel for how these buffers work in practice, feel free to try out the demo below. Once you are
+        done with that, we will next explore the different types of channel operations that are available.
+    </p>
+
+    <aside id="channel-demo">
+        <h3>Channel buffer demo</h3>
+
+        <p>
+            Below, you will try out channels with different buffer types and see how they work. Just choose
+            a buffer type and size and click the ‘Reset channel’ button. After that, you can start producing
+            and consuming values using the various buttons. If an operation is blocked, the button will be
+            disabled.
+        </p>
+
+        <p>
+            Note that when resetting a channel, the old channel’s contents will be drained, freeing all blocked
+            producers.
+        </p>
+
+        <div id="channel-type-widget"></div>
+        <div justified horizontal layout style="margin: 1em 0">
+            <div id="produce-widget-1"></div>
+            <div id="produce-widget-2"></div>
+            <div id="produce-widget-3"></div>
+            <div id="produce-widget-4"></div>
+            <div id="produce-widget-5"></div>
+        </div>
+        <div justified horizontal layout style="margin: 1em 0">
+            <div id="consume-widget-1"></div>
+            <div id="consume-widget-2"></div>
+            <div id="consume-widget-3"></div>
+            <div id="consume-widget-4"></div>
+            <div id="consume-widget-5"></div>
+        </div>
+        <div id="messages-widget"></div>
+        <paper-shadow z="1"></paper-shadow>
+    </aside>
+</section>
+
+<section id="basic-channel-ops">
+    <h2>Basic channel operations</h2>
+
+    <p>
+        Fundamentally, there are only three things you can do with a channel:
+    </p>
+
+    <ol>
+        <li>You can put a value into a channel</li>
+        <li>You can take a value from a channel</li>
+        <li>You can close channel</li>
+    </ol>
+
+    <p>
+        While this seems simple enough, there are a few things to keep in mind for each of these operations:
+    </p>
+
+    <ul>
+        <li>You cannot put <code>nil</code> in s channel.</li>
+        <li>Putting into a closed channel is effectively a no-op.</li>
+        <li>A <code>nil</code> value taken from a channel indicates it has been closed.</li>
+        <li>Closing a channel is idempotent.</li>
+        <li>
+            Closing a channel does not dispose of its buffer, i.e. all values in the buffer are still available
+            to be taken once the channel has been closed. Naturally, no new values can be put into a channel.
+        </li>
+    </ul>
+
+    <p>
+        Furthermore, for takes and puts, there are three different flavours of each:
+    </p>
+
+    <ol>
+        <li>
+            <em>Asynchronous</em>: <code><a href="apidocs#put_BANG_">put!</a></code> and
+            <code><a href="apidocs#take_BANG_">take!</a></code>, will return immediately and perform the channel
+            operation asynchronously. You can optionally pass a callback that will let you know the result of the
+            operation once it has completed.
+        </li>
+        <li>
+            <em>Blocking</em>: <code><a href="apidocs#_GT__BANG__BANG_">&gt;!!</a></code> and
+            <code><a href="apidocs#_LT__BANG__BANG_">&lt;!!</a></code> will respectively either put a value into a
+            channel
+            or take a value from a channel. These functions will block until the operation completes, returning the
+            result of the operation.
+        </li>
+        <li>
+            <em>Parking</em>: <code><a href="apidocs#_GT__BANG_">&gt;!</a></code> and
+            <code><a href="apidocs#_LT__BANG_">&lt;!</a></code> are special functions that can only exist within the
+            context
+            of a <code>go</code> expression, which we will explore in greater detail next.
+        </li>
+    </ol>
+
+    <p>
+        One last note about the different types of basic put/take operations: the blocking variants are only available
+        in Clojure, which supports multiple real threads of execution. ClojureScript inherits JavaScript’s
+        single-threaded runtime, and, as such, blocking operations do not make any sense.
+    </p>
+</section>
+
+<section id="go-macro">
+    <h2>The <code>go</code> macro</h2>
+
+    <p>
+        The <code><a href="apidocs#go">go</a></code> macro is truly one of the most exciting parts of core.async. Let’s
+        start with a simple motivating example.
+    </p>
+
+    <section>
+        <h3>A simple example</h3>
+
+        <p>
+            Let’s start with a simple function that takes two channels as arguments. It will take values from one
+            channel, square them, and place the result in the output channel. We will start by using the blocking
+            functions.
+        </p>
+
+            <pre class="brush: clojure">(defn square-blocking
+      [in out]
+      (loop []
+        (when-let [v (&lt;!! in)]
+          (&gt;!! out (* v v))
+          (recur)))) </pre>
+
+        <p>
+            It is relatively easy to understand what is going on here. As long as the function can read values from the
+            input channel, it will square them and place them in the output channel. In the case that a channel’s buffer
+            is full, the operation will block.
+        </p>
+
+        <p>
+            Unfortunately, this code cannot be used in ClojureScript. If you called this function in Clojure, it would
+            block until the input channel is closed and drained. How could we accomplish the same task asynchronously?
+        </p>
+
+            <pre class="brush: clojure">(defn square-async
+      [in out]
+      (letfn [(in-handler [v]
+                (when v
+                  (put! out (* v v) out-handler)))
+              (out-handler [_]
+                (take! in in-handler))]
+        (out-handler)))</pre>
+
+        <p>
+            Well, that’s a bit different. It is much harder to understand what is going on in the above code. While we
+            could simplify it by not waiting for the put to complete, that would make it behave differently from our
+            blocking variant.
+        </p>
+
+        <p>
+            Nonetheless, this asynchronous variant would work just fine in ClojureScript. The only price we have to pay
+            is a small sampling of callback hell. But what if there was a way to maintain the readability of the
+            synchronous function buy still enjoy the benefits of asynchronous operation? Well, let’s check out what
+            <code>go</code> can do for us:
+        </p>
+
+            <pre class="brush: clojure">(defn square-parking
+      [in out]
+      (go
+        (loop []
+          (when-let [v (&lt;! in)]
+            (&gt;! out (* v v))
+            (recur)))))</pre>
+
+        <p>
+            Well, isn’t that refreshing? This variant reads almost exactly like the blocking variant but behaves just
+            like the asynchronous variant!
+        </p>
+
+    </section>
+
+
+    <section>
+        <h3>How it works</h3>
+
+        <p>
+            While the details of exactly how the <code>go</code> macro works are well beyond the scope of this
+            reference, the general idea is that the macro compiles the contents of the expression into a finite state
+            machine. For example, the above <code>square-parking</code> <code>go</code> expression is transformed into
+            something that looks roughly like:
+        </p>
+
+        <img src="/images/square_fsm.png" alt="Finite state machine diagram for square-parking go expression">
+
+        <p>
+            The body of the <code>go</code> expression is executed asynchronously. In the case of Clojure, while the
+            code is actively executing, it does so in a thread from a thread pool for core.async. When the code is not
+            executing, it gets attached to the channel whose operation is currently parked.
+        </p>
+    </section>
+
+    <section>
+        <h3>More <code>go</code></h3>
+
+        <p>
+            Before leaving the subject of the <code>go</code> macro, there a couple of final notes:
+        </p>
+
+        <ol>
+            <li>
+                <strong>Do not make blocking calls from within a <code>go</code> expression.</strong> Instead, use the
+                <code><a href="thread">thread</a></code> macro and blocking variants of channel operations.
+            </li>
+            <li>
+                The <code>go</code> macro returns a channel. The channel will receive the resulting value of the <code>go</code>
+                expression when it terminates.
+            </li>
+        </ol>
+    </section>
+</section>
+
+</article>
+<script src="/js/channel-demo.js" type="text/javascript"></script>
+</template>
