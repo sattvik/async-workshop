@@ -33,7 +33,12 @@
                                                         :optimizations :advanced
                                                         :pretty-print false
                                                         :preamble ["react/react.min.js"]
-                                                        :externs ["react/externs/react.js"]}}]}}
+                                                        :externs ["react/externs/react.js"]}}]}
+                   :repl-options {:init-ns user
+                                  :init (start)
+                                  :welcome (do
+                                             (println "Welcome to the core.async tutorial!")
+                                             (println "Please browse to http://localhost:9000 to get started."))}}
              :metadev {:cljsbuild {:builds [{:id "channel-demo"
                                              :source-paths ["src/channel-demo" "devel/cljs"]
                                              :compiler {:output-to "target/classes/public/js/channel-demo.js"
