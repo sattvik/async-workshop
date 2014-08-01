@@ -25,18 +25,37 @@
                      (sort-by (comp name :name))))
 
 (def nav-menu
-  [{:label "API Docs"
+  [{:label "Primitives"
+    :icon "extension"
+    :base-uri "/reference/primitives"
+    :items [{:label "About core.async"
+             :anchor "about"}
+            {:label "Channels"
+             :anchor "channels"}
+            {:label "Buffered channels"
+             :anchor "buffered-channels"}
+            {:label "Basic operations"
+             :anchor "basic-channel-ops"}
+            {:label "The go macro"
+             :anchor "go-macro"}]}
+   #_{:label "Patterns"
+    :icon "view-quilt"
+    :base-uri "/reference/patterns"
+    :items []}
+   {:label "API"
     :icon "settings"
     :base-uri "/reference/apidocs"
     :items (mapv (fn [meta]
                    {:label (name (:name meta))
                     :anchor (:id meta)})
                  async-vars)}
-   #_{:label "Patterns"
-    :icon "view-quilt"
-    :base-uri "/reference/patterns"
+   #_{:label "FAQ"
+    :icon "help"
+    :base-uri "/reference/faq"
+    :items []}
+   #_{:label "External resources"
+    :icon "language"
     :items []}])
-
 
 (defpage main-page
   "templates/reference/index.html"
@@ -83,6 +102,13 @@
                     (el/set-attr :clojureonly (clojure-only-async-vars name))
                     (el/content (parse-doc doc)))))
 
+(defpage primitives-page
+  "templates/reference/primitives.html"
+  nav-menu
+  {:title "core.async primitives"
+   :subtitle "Understanding building blocks"})
+
 (defroutes routes
   (GET "/" request main-page)
-  (GET "/apidocs" request apidocs-page))
+  (GET "/apidocs" request apidocs-page)
+  (GET "/primitives" request primitives-page))
