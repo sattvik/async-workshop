@@ -14,16 +14,30 @@
                  [om "0.6.4"]
                  [ring/ring-core "1.3.0"]]
   :plugins [[lein-cljsbuild "1.0.3"]]
-  :source-paths ["src/clj" "src/cljs"]
+  :source-paths ["src/clj" "src/chat-demo" "src/channel-demo"]
   :resource-paths ["resources"]
   :main async-workshop.server
   :hooks [leiningen.cljsbuild]
-  :cljsbuild {:builds [{:source-paths ["src/cljs"]
-                        :compiler {:output-to "target/classes/public/js/chatDriver.js"
-                                   :output-dir "target/classes/public/js"
-                                   :optimizations :none
-                                   :source-map true}}]}
-  :profiles {:dev {:source-paths ["devel/clj"]
+  :profiles {:dev {:source-paths ["devel/clj" "dev/cljs"]
                    :dependencies [[ring/ring-devel "1.3.0"]]
-                   :plugins [[com.cemerick/austin "0.1.4"]]}
-             :uberjar {:aot :all}})
+                   :plugins [[com.cemerick/austin "0.1.4"]]
+                   :cljsbuild {:builds [{:id "chat-demo"
+                                         :source-paths ["src/chat-demo"]
+                                         :compiler {:output-to "target/classes/public/js/chat-demo.js"
+                                                    :output-dir "target/classes/public/js/chat-demo"
+                                                    :optimizations :none
+                                                    :source-map true}}
+                                        {:id "channel-demo"
+                                         :source-paths ["src/channel-demo" "devel/cljs"]
+                                         :compiler {:output-to "target/classes/public/js/channel-demo.js"
+                                                    :output-dir "target/classes/public/js/channel-demo"
+                                                    :optimizations :none
+                                                    :source-map true}}]}}
+             :uberjar {:aot :all
+                       :cljsbuild {:builds [{:id "channel-demo"
+                                             :source-paths ["src/channel-demo"]
+                                             :compiler {:output-to "target/classes/public/js/channel-demo.js"
+                                                        :optimizations :advanced
+                                                        :pretty-print false
+                                                        :preamble ["react/react.min.js"]
+                                                        :externs ["react/externs/react.js"]}}]}}})
