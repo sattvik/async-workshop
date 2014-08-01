@@ -28,11 +28,18 @@
                                                     :optimizations :none
                                                     :source-map true}}
                                         {:id "channel-demo"
-                                         :source-paths ["src/channel-demo" "devel/cljs"]
-                                         :compiler {:output-to "target/classes/public/js/channel-demo.js"
-                                                    :output-dir "target/classes/public/js/channel-demo"
-                                                    :optimizations :none
-                                                    :source-map true}}]}}
+                                             :source-paths ["src/channel-demo"]
+                                             :compiler {:output-to "target/classes/public/js/channel-demo.js"
+                                                        :optimizations :advanced
+                                                        :pretty-print false
+                                                        :preamble ["react/react.min.js"]
+                                                        :externs ["react/externs/react.js"]}}]}}
+             :metadev {:cljsbuild {:builds [{:id "channel-demo"
+                                             :source-paths ["src/channel-demo" "devel/cljs"]
+                                             :compiler {:output-to "target/classes/public/js/channel-demo.js"
+                                                        :output-dir "target/classes/public/js/channel-demo"
+                                                        :optimizations :none
+                                                        :source-map true}}]}}
              :uberjar {:aot :all
                        :cljsbuild {:builds [{:id "channel-demo"
                                              :source-paths ["src/channel-demo"]
