@@ -8,7 +8,8 @@
 ;
 
 (ns async-workshop.chat-demo.client
-  (:require [async-workshop.chat-demo.client.web-socket :refer [ws-widget]]
+  (:require [async-workshop.chat-demo.client.input :refer [chat-input-widget]]
+            [async-workshop.chat-demo.client.web-socket :refer [ws-widget]]
             [clojure.browser.repl]
             [cljs.core.async :as async]
             [om.core :as om :include-macros true]
