@@ -46,12 +46,12 @@
 
 (defn ^:private event-loop
   [app-state socket-events socket]
-  (let [tx-channel (:transmit-channel app-state)
+  (let [transmit-channel (:transmit-channel app-state)
         append-chat-history
           (fn [msg]
             (om/transact! app-state [:chat-history] #(conj % msg)))]
     (go-loop []
-      (when-let [[{:keys [type value]} _] (async/alts! [socket-events tx-channel])]
+      (when-let [[{:keys [type value]} _] (async/alts! [socket-events transmit-channel])]
         (condp = type
           :socket-opened (append-chat-history "Connection to server established.")
           :socket-closed (append-chat-history "Connection to server lost.")
