@@ -46,6 +46,7 @@
     </section>
     <section id="about-the-code">
         <h2>About the code</h2>
+
         <p>
             The code is packaged as a Leiningen project. This project includes the source code for this web site,
             including the reference, tutorial instructions, and the chat demo itself. You should be able to run the
@@ -63,7 +64,7 @@
                     <code>src/clj</code> is the root for all of the Clojure code used in the application.
                 </li>
                 <li>
-                    <code>src/cljs</code> is the root for all of the ClojureScript code used in the application.
+                    <code>src/chat-demo</code> is the root for all of the ClojureScript code used in the application.
                 </li>
                 <li>
                     <code>devel/clj</code> contains code primarily for use during development. This includes browser
@@ -75,7 +76,7 @@
                 </li>
             </ul>
         </section>
-        <sestion>
+        <section>
             <h3>Code structure</h3>
 
             <p>
@@ -93,10 +94,11 @@
                     chat demo/tutorial. You won't really need to worry about this cod
                 </li>
             </ul>
-        </sestion>
+        </section>
     </section>
     <section id="develop-the-code">
         <h2>Develop the code</h2>
+
         <p>
             When Leiningen runs with the <code>dev</code> profile, it will enable various features useful for
             development. Namely:
@@ -109,7 +111,7 @@
             <li>
                 The first time that the server it started, it will create an Austin-based browser REPL environment
                 that will be injected into the served HTML pages. You can access this environment by using
-                <code>@user/repl-env</code>.  For example, you can convert your Leiningen REPL to a ClojureScript by
+                <code>@user/repl-env</code>. For example, you can convert your Leiningen REPL to a ClojureScript by
                 invoking <code>(cemerick.austin.repls/cljs-repl @user/repl-env)</code>.
             </li>
             <li>
@@ -120,6 +122,8 @@
     </section>
     <section>
         <p>Ready to get started?</p>
-        <a href="/tutorial/a-minimal-client"><paper-button label="Build a minimal client" class="inverse" raisedbutton></paper-button></a>
+        <a href="/tutorial/a-minimal-client">
+            <paper-button label="Build a minimal client" class="inverse" raisedbutton></paper-button>
+        </a>
     </section>
 </template>
