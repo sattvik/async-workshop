@@ -186,22 +186,22 @@
 
 (js/Polymer
   "async-workshop-channel-demo"
-  #js {:publish #js {:bufferType "unbuffered"
-                     :bufferSize 3
-                     :invalidBufferSize false
-                     :producers nil
-                     :consumers nil
-                     :messages nil}
-       :bufferTypeChanged #(signal-buffer-type-changed (js* "this") %1 %2)
-       :messagesChanged #(scroll-message-window (js* "this"))
+  #js {:bufferType "unbuffered"
+       :bufferSize 3
+       :invalidBufferSize false
+       :producers nil
+       :consumers nil
+       :messages nil
+       :bufferTypeChanged #(this-as demo (signal-buffer-type-changed demo %1 %2))
+       :messagesChanged #(this-as demo (scroll-message-window demo))
        :events nil
        :demo-channel nil
-       :created #(on-create (js* "this"))
-       :attached #(event-loop (js* "this"))
-       :detached #(let [this (js* "this")] (async/close! (aget this "events")))
-       :bufferSizeValidated #(let [this (js* "this")]
-                               (aset this "invalidBufferSize" (aget ($ this :buffer-size) "invalid")))
-       :consume #(consume (js* "this") %1 %3)
-       :produce #(produce (js* "this") %1 %3)
-       :closeChannel #(close-channel (js* "this"))
-       :resetChannel #(reset-channel (js* "this"))})
+       :created #(this-as demo (on-create demo))
+       :attached #(this-as demo (event-loop demo))
+       :detached #(this-as demo (async/close! (aget demo "events")))
+       :bufferSizeValidated #(this-as demo
+                               (aset demo "invalidBufferSize" (aget ($ demo :buffer-size) "invalid")))
+       :consume #(this-as demo (consume demo %1 %3))
+       :produce #(this-as demo (produce demo %1 %3))
+       :closeChannel #(this-as demo (close-channel demo))
+       :resetChannel #(this-as demo (reset-channel demo))})
