@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2277"]
+                 [org.clojure/clojurescript "0.0-2280"]
                  [org.clojure/core.async "0.1.303.0-886421-alpha"]
                  [com.cemerick/friend "0.2.1" :exclusions [org.clojure/core.cache]]
                  [compojure "1.1.8"]
@@ -28,12 +28,10 @@
                                                     :optimizations :none
                                                     :source-map true}}
                                         {:id "channel-demo"
-                                             :source-paths ["src/channel-demo"]
-                                             :compiler {:output-to "target/classes/public/js/channel-demo.js"
-                                                        :optimizations :advanced
-                                                        :pretty-print false
-                                                        :preamble ["react/react.min.js"]
-                                                        :externs ["react/externs/react.js"]}}]}
+                                         :source-paths ["src/channel-demo"]
+                                         :compiler {:output-to "target/classes/public/components/async-workshop-channel-demo/async-workshop-channel-demo.js"
+                                                    :optimizations :advanced
+                                                    :pretty-print false}}]}
                    :repl-options {:init-ns user
                                   :init (start)
                                   :welcome (do
@@ -41,15 +39,13 @@
                                              (println "Please browse to http://localhost:9000 to get started."))}}
              :metadev {:cljsbuild {:builds [{:id "channel-demo"
                                              :source-paths ["src/channel-demo" "devel/cljs"]
-                                             :compiler {:output-to "target/classes/public/js/channel-demo.js"
-                                                        :output-dir "target/classes/public/js/channel-demo"
+                                             :compiler {:output-to "target/classes/public/components/async-workshop-channel-demo/async-workshop-channel-demo.js"
+                                                        :output-dir "target/classes/public/components/async-workshop-channel-demo/out"
                                                         :optimizations :none
                                                         :source-map true}}]}}
              :uberjar {:aot :all
                        :cljsbuild {:builds [{:id "channel-demo"
                                              :source-paths ["src/channel-demo"]
-                                             :compiler {:output-to "target/classes/public/js/channel-demo.js"
+                                             :compiler {:output-to "target/classes/public/components/async-workshop-channel-demo/async-workshop-channel-demo.js"
                                                         :optimizations :advanced
-                                                        :pretty-print false
-                                                        :preamble ["react/react.min.js"]
-                                                        :externs ["react/externs/react.js"]}}]}}})
+                                                        :pretty-print false}}]}}})

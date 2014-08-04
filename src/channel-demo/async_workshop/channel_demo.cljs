@@ -8,151 +8,200 @@
 ;
 
 (ns async-workshop.channel-demo
-  (:require [cljs.core.async :as async]
-            [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]))
+  (:require [cljs.core.async :as async :refer [<!]])
+  (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
-(def demo-state (atom {:channel (async/chan)
-                       :channel-id 1
-                       :messages ["Created unbuffered channel #1."]}))
+(defn $
+  [element id]
+  (aget (aget element "$") (clj->js id)))
 
-(defn conj-message!
-  [cursor message]
-  (om/transact! cursor [:messages] #(conj % message)))
+(defn buffer-type-updated
+  [{:keys [new-value old-value element] :as event}]
+  (if (some #(= "unbuffered" %) [old-value new-value])
+    (let [buffer-size ($ element :buffer-size)
+          animation ($ element :fadein)
+          [dir opacity] (if (= new-value "unbuffered")
+                          ["reverse" 0]
+                          ["normal" 1])]
+      (set! (.-direction animation) dir)
+      (set! (.-target animation) buffer-size)
+      (.play animation)
+      (set! (.-opacity (.-style buffer-size)) opacity))))
 
-(defn update-channel
-  [cursor {:keys [buffer-type buffer-size]}]
-  (om/transact! cursor
-    (fn [{:keys [channel channel-id messages]}]
-      (async/close! channel)
-      (async/into [] channel)
-      (let [new-id (inc channel-id)]
-        {:channel (condp = buffer-type
-                    :unbuffered (async/chan)
-                    :fixed (async/chan buffer-size)
-                    :dropping (async/chan (async/dropping-buffer buffer-size))
-                    :sliding (async/chan (async/sliding-buffer buffer-size)))
-         :channel-id new-id
-         :messages (conj messages
-                         (if (= :unbuffered buffer-type)
-                           (str "Created unbuffered channel #" new-id \.)
-                           (str "Created channel #" new-id " with a " (name buffer-type) " buffer of size " buffer-size \.)))}))))
+(defn event-loop
+  [element]
+  (let [events (aget element "events")
+        messages (aget element "messages")
+        messages-element ($ element :messages)
+        post-message #(.push messages %)]
+    (go-loop []
+      (when-let [{:keys [type] :as event} (<! events)]
+        (condp = type
+          :buffer-type-changed
+            (buffer-type-updated event)
+          :produce-completed
+            (let [{:keys [model value producer-id channel-id]} event]
+              (aset model "waiting" false)
+              (aset model "next" (inc value))
+              (post-message (str "Producer " producer-id " put " value " into channel #" channel-id \.)))
+          :produce-failed
+            (let [{:keys [model value producer-id channel-id]} event]
+              (aset model "waiting" false)
+              (post-message (str "Producer " producer-id " failed to put into channel #" channel-id " because it was closed.")))
+          :consume-completed
+            (let [{:keys [model value producer-id consumer-id channel-id]} event]
+              (aset model "waiting" false)
+              (post-message (str "Consumer " consumer-id " took value " value " from producer " producer-id " on channel #" channel-id \.)))
+          :consume-failed
+            (let [{:keys [model value consumer-id channel-id]} event]
+              (aset model "waiting" false)
+              (post-message (str "Consumer " consumer-id " failed to take from channel #" channel-id " because it was closed.")))
+          :close-channel
+            (let [{:keys [channel channel-id]} event]
+              (post-message (str "Draining and closing channel #" channel-id \.))
+              (async/close! channel)
+              (let [drain (async/map< #(assoc % :type :channel-drained :channel-id channel-id)
+                                      channel)]
+                (async/pipe drain events false)))
+          :channel-drained
+            (let [{:keys [producer-id channel-id value]} event]
+              (post-message (str "Value " value " from producer " producer-id " drained from channel #" channel-id \.)))
+          :create-channel
+            (let [{:keys [buffer-size buffer-type channel-id demo-channel]} event]
+              (aset demo-channel "channel-id" channel-id)
+              (aset demo-channel "channel"
+                    (condp = buffer-type
+                      :unbuffered (async/chan)
+                      :fixed (async/chan buffer-size)
+                      :dropping (async/chan (async/dropping-buffer buffer-size))
+                      :sliding (async/chan (async/sliding-buffer buffer-size))))
+              (post-message
+                (if (= :unbuffered buffer-type)
+                  (str "Created unbuffered channel #" channel-id \.)
+                  (str "Created channel #" channel-id " with " (name buffer-type) " buffer of size " buffer-size \.)))))
+        (recur)))))
 
-(defn channel-type-widget
-  [app-state owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:buffer-type :unbuffered
-       :buffer-size 3})
-    om/IRenderState
-    (render-state [_ {:keys [buffer-type buffer-size] :as local-state}]
-      (dom/div nil
-        "Use a channel that has "
-        (dom/select #js {:onChange (fn [e]
-                                     (om/set-state! owner [:buffer-type] (keyword (.-value (.-target e)))))
-                         :value (name buffer-type)}
-          (dom/option #js {:value "unbuffered"} "no buffer (default)")
-          (dom/option #js {:value "fixed"} "fixed buffer")
-          (dom/option #js {:value "dropping"} "dropping buffer")
-          (dom/option #js {:value "sliding"} "sliding buffer"))
-        (when (not= :unbuffered buffer-type)
-          (dom/span nil
-            " with a size of "
-            (dom/input #js {:onChange (fn [e]
-                                        (om/set-state! owner [:buffer-size] (int (.-value (.-target e)))))
-                            :value buffer-size
-                            :min 1
-                            :max 5
-                            :type "number"})))
-        "."
-        (dom/button #js {:onClick (fn [e] (update-channel app-state local-state))}
-          "Reset channel")))
-    om/IDisplayName
-    (display-name [_] "channel-type-widget")))
+(defn on-create
+  [element]
+  (doto element
+    (aset "events" (async/chan))
+    (aset "demo-channel" #js {:channel (async/chan)
+                              :channel-id 1})
+    (aset "producers" (apply array
+                             (for [i (range 1 6)]
+                               #js {:id (char (+ i 64))
+                                    :next (* i 100)
+                                    :waiting false})))
+    (aset "consumers" (apply array
+                             (for [i (range 1 6)]
+                               #js {:id (char (+ 64 i))
+                                    :waiting false})))
+    (aset "messages" #js ["Created unbuffered channel #1."])))
 
-(defn messages-widget
-  [cursor owner]
-  (reify
-    om/IRender
-    (render [_]
-      (js/setTimeout
-        (fn []
-          (when-let [ta (om/get-node owner "log")]
-            (set! (.-scrollTop ta) (+ 100 (.-scrollHeight ta)))))
-        0)
-      (dom/textarea #js {:readOnly true
-                                 :rows 10
-                                 :style #js {:width "100%"
-                                             :margin-top "1em"}
-                                 :value (apply str (interpose \newline (:messages cursor)))
-                                 :ref "log"}))
-    om/IDisplayName
-    (display-name [_] "messages-widget")))
+(defn signal-buffer-type-changed
+  [element old-val new-val]
+  (let [events (aget element "events")]
+    (async/put! events
+                {:type :buffer-type-changed
+                 :old-value old-val
+                 :new-value new-val
+                 :element element})))
 
-(defn produce-widget
-  [cursor owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:waiting? false
-       :value 1})
-    om/IRenderState
-    (render-state [_ {:keys [id value waiting?] :as local-state}]
-      (dom/button #js {:onClick (fn [_]
-                                  (om/set-state! owner [:waiting?] true)
-                                  (let [{:keys [channel channel-id]} @cursor]
-                                    (async/put! channel
-                                                {:producer-id id
-                                                 :value value}
-                                                (fn [v]
-                                                  (om/set-state! owner [:waiting?] false)
-                                                  (if-not v
-                                                    (conj-message! cursor (str "Producer " id " failed to insert a value because channel #" channel-id " was closed."))
-                                                    (do
-                                                      (conj-message! cursor (str "Producer " id " inserted " value " into channel #" channel-id \.))
-                                                      (om/update-state! owner [:value] inc)))))))
-                       :disabled waiting? }
-        (str "Produce " value " from " id \!)))
-    om/IDisplayName
-    (display-name [_]
-      "produce-widget")))
+(defn consume
+  [polymer-element event sender]
+  (let [[channel channel-id] (map #(aget (aget polymer-element "demo-channel") %)
+                                  (array "channel" "channel-id"))
+        event-channel (aget polymer-element "events")
+        model (-> event
+                  (aget "target")
+                  (aget "templateInstance")
+                  (aget "model")
+                  (aget "c"))]
+    (aset model "waiting" true)
+    (async/take! channel
+                 (fn [v]
+                   (let [base {:channel-id channel-id
+                               :consumer-id (aget model "id")
+                               :model model}]
+                     (async/put! event-channel
+                                 (if-let [{:keys [producer-id value]} v]
+                                   (assoc base
+                                          :type :consume-completed
+                                          :producer-id producer-id
+                                          :value value)
+                                   (assoc base :type :consume-failed))))))))
 
-(defn consume-widget
-  [cursor owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:waiting? false})
-    om/IRenderState
-    (render-state [_ {:keys [id value waiting?] :as local-state}]
-      (dom/button #js {:disabled waiting?
-                       :onClick (fn [_]
-                                  (om/set-state! owner [:waiting?] true)
-                                  (let [{:keys [channel channel-id]} @cursor]
-                                    (async/take! channel
-                                                 (fn [v]
-                                                   (om/set-state! owner [:waiting?] false)
-                                                   (if-let [{:keys [producer-id value]} v]
-                                                     (conj-message! cursor (str "Consumer " id " consumed " value " from producer " producer-id " on channel #" channel-id \.))
-                                                     (conj-message! cursor (str "Consumer " id " failed consume a value because channel #" channel-id " was closed.")))))))}
-        (str "Consume from " id \!)))
-    om/IDisplayName
-    (display-name [_]
-      "produce-widget")))
+(defn produce
+  [polymer-element event sender]
+  (let [[channel channel-id] (map #(aget (aget polymer-element "demo-channel") %)
+                                  (array "channel" "channel-id"))
+        event-channel (aget polymer-element "events")
+        model (-> event
+                  (aget "target")
+                  (aget "templateInstance")
+                  (aget "model")
+                  (aget "p"))
+        value (int (aget model "next"))]
+    (aset model "waiting" true)
+    (async/put! channel
+                {:producer-id (aget model "id")
+                 :value value}
+                (fn [v]
+                  (async/put! event-channel
+                              {:type (if v :produce-completed :produce-failed)
+                               :channel-id channel-id
+                               :producer-id (aget model "id")
+                               :value value
+                               :model model})))))
 
-(om/root channel-type-widget demo-state
-  {:target (.getElementById js/document "channel-type-widget")})
+(defn close-channel
+  [polymer-element]
+  (let [demo-channel (aget polymer-element "demo-channel")
+        events (aget polymer-element "events")]
+    (async/put! events
+                {:type :close-channel
+                 :channel (aget demo-channel "channel")
+                 :channel-id (aget demo-channel "channel-id")})))
 
-(om/root messages-widget demo-state
-  {:target (.getElementById js/document "messages-widget")})
+(defn reset-channel
+  [polymer-element]
+  (close-channel polymer-element)
+  (let [demo-channel (aget polymer-element "demo-channel")
+        events (aget polymer-element "events")]
+    (async/put! events
+                {:type :create-channel
+                 :buffer-size (int (aget polymer-element "bufferSize"))
+                 :buffer-type (keyword (aget polymer-element "bufferType"))
+                 :channel-id (inc (int (aget demo-channel "channel-id")))
+                 :demo-channel demo-channel})))
 
-(doseq [i (range 1 6)]
-  (om/root produce-widget demo-state
-    {:target (.getElementById js/document (str "produce-widget-" i))
-     :state {:id (get [\A \B \C \D \E] (dec i))}}))
+(defn scroll-message-window
+  [polymer-element]
+  (let [messages-list ($ polymer-element :messages)]
+    (.setTimeout js/window
+                 #(aset messages-list
+                        "scrollTop"
+                        (aget messages-list "scrollHeight"))
+                 0)))
 
-(doseq [i (range 1 6)]
-  (om/root consume-widget demo-state
-    {:target (.getElementById js/document (str "consume-widget-" i))
-     :state {:id (get [\F \G \H \I \J] (dec i))}}))
+(js/Polymer
+  "async-workshop-channel-demo"
+  #js {:publish #js {:bufferType "unbuffered"
+                     :bufferSize 3
+                     :invalidBufferSize false
+                     :producers nil
+                     :consumers nil
+                     :messages nil}
+       :bufferTypeChanged #(signal-buffer-type-changed (js* "this") %1 %2)
+       :messagesChanged #(scroll-message-window (js* "this"))
+       :events nil
+       :demo-channel nil
+       :created #(on-create (js* "this"))
+       :attached #(event-loop (js* "this"))
+       :detached #(let [this (js* "this")] (async/close! (aget this "events")))
+       :bufferSizeValidated #(let [this (js* "this")]
+                               (aset this "invalidBufferSize" (aget ($ this :buffer-size) "invalid")))
+       :consume #(consume (js* "this") %1 %3)
+       :produce #(produce (js* "this") %1 %3)
+       :closeChannel #(close-channel (js* "this"))
+       :resetChannel #(reset-channel (js* "this"))})
