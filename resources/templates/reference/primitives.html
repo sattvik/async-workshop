@@ -6,6 +6,7 @@
   -->
 
 <template>
+<link rel="import" href="/components/async-workshop-channel-demo/async-workshop-channel-demo.html">
 <article id="about">
 <h2>About core.async</h2>
 
@@ -140,22 +141,7 @@
             producers.
         </p>
 
-        <div id="channel-type-widget"></div>
-        <div justified horizontal layout style="margin: 1em 0">
-            <div id="produce-widget-1"></div>
-            <div id="produce-widget-2"></div>
-            <div id="produce-widget-3"></div>
-            <div id="produce-widget-4"></div>
-            <div id="produce-widget-5"></div>
-        </div>
-        <div justified horizontal layout style="margin: 1em 0">
-            <div id="consume-widget-1"></div>
-            <div id="consume-widget-2"></div>
-            <div id="consume-widget-3"></div>
-            <div id="consume-widget-4"></div>
-            <div id="consume-widget-5"></div>
-        </div>
-        <div id="messages-widget"></div>
+        <async-workshop-channel-demo></async-workshop-channel-demo>
         <paper-shadow z="1"></paper-shadow>
     </aside>
 </section>
@@ -332,7 +318,6 @@
         </ol>
     </section>
 </section>
-
 </article>
-<script src="/js/channel-demo.js" type="text/javascript"></script>
+
 </template>

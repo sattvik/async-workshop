@@ -1,0 +1,73 @@
+<!--
+  ~ Copyright © 2014 Daniel Solano Gómez.
+  ~
+  ~ This program is provided under the terms of the Eclipse Public License 1.0
+  ~ <http://www.eclipse.org/org/documents/epl-v10.html>.  Any use, reproduction,
+  ~ or distribution of this program constitutes recipient's acceptance of this
+  ~ license.
+  -->
+
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/components/core-animation/core-animation.html">
+<link rel="import" href="/components/paper-button/paper-button.html">
+<link rel="import" href="/components/paper-input/paper-input.html">
+<link rel="import" href="/components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="/components/paper-radio-group/paper-radio-group.html">
+
+<polymer-element name="async-workshop-channel-demo" vertical layout>
+    <template>
+        <link rel="stylesheet" type="text/css" href="async-workshop-channel-demo.css">
+
+        <core-animation id="fadein" duration="200">
+            <core-animation-keyframe>
+                <core-animation-prop name="opacity" value="0"></core-animation-prop>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+                <core-animation-prop name="opacity" value="1"></core-animation-prop>
+            </core-animation-keyframe>
+        </core-animation>
+
+        <label for="buffer-type">Buffer type:</label>
+        <paper-radio-group selected="{{bufferType}}" id="buffer-type" horizontal layout wrap>
+            <paper-radio-button name="unbuffered" label="Unbuffered"></paper-radio-button>
+            <paper-radio-button name="fixed" label="Fixed buffer"></paper-radio-button>
+            <paper-radio-button name="dropping" label="Dropping buffer"></paper-radio-button>
+            <paper-radio-button name="sliding" label="Sliding buffer"></paper-radio-button>
+        </paper-radio-group>
+
+        <paper-input id="buffer-size" type="number" error="Must be a number between 1 and 5, inclusive"
+                     validate="^[1-5]$" required label="Buffer size" floatingLabel value="{{bufferSize}}"
+                     style="opacity: 0;" on-input-valid="{{bufferSizeValidated}}"
+                     on-input-invalid="{{bufferSizeValidated}}"></paper-input>
+
+        <div layout horizontal around-justified>
+            <paper-button label="Reset channel" raisedButton on-tap="{{resetChannel}}"
+                          disabled?="{{ bufferType != 'unbuffered' && invalidBufferSize }}"></paper-button>
+            <paper-button label="Close channel" raisedButton on-tap="{{closeChannel}}"></paper-button>
+        </div>
+        <label for="producers">Producers:</label>
+
+        <div layout horizontal wrap id="producers">
+            <template repeat="{{p in producers}}">
+                <paper-button id="producer-{{p.id}}" raisedButton label="{{p.id}}: Produce {{p.next}}"
+                              on-tap="{{produce}}" disabled?="{{p.waiting}}"></paper-button>
+            </template>
+        </div>
+        <label for="producers">Consumers:</label>
+
+        <div layout horizontal wrap id="consumers">
+            <template repeat="{{c in consumers}}">
+                <paper-button id="consumer-{{c.id}}" raisedButton label="{{c.id}}: Consume"
+                              on-tap="{{consume}}" disabled?="{{c.waiting}}"></paper-button>
+            </template>
+        </div>
+
+        <label for="messages">Event log:</label>
+        <ol id="messages">
+            <template repeat="{{m in messages}}">
+                <li>{{m}}</li>
+            </template>
+        </ol>
+    </template>
+    <script src="async-workshop-channel-demo.js" type="text/javascript"></script>
+</polymer-element>
