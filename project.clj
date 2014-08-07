@@ -3,15 +3,16 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[org.clojure/clojure "1.7.0-alpha1"]
                  [org.clojure/clojurescript "0.0-2280"]
-                 [org.clojure/core.async "0.1.303.0-886421-alpha"]
+                 [org.clojure/core.async "0.1.319.0-6b1aca-alpha"]
+                 [org.clojure/data.json "0.2.5"]
                  [com.cemerick/friend "0.2.1" :exclusions [org.clojure/core.cache]]
                  [compojure "1.1.8"]
-                 [enlive "1.1.5"]
+                 [io.clojure/enlive "1.1.5-1.7"]
                  [http-kit "2.1.16"]
                  [javax.servlet/servlet-api "2.5"]
-                 [om "0.7.0"]
+                 [om "0.7.1"]
                  [ring/ring-core "1.3.0"]]
   :plugins [[lein-cljsbuild "1.0.3"]]
   :source-paths ["src/clj" "src/chat-demo" "src/channel-demo"]
