@@ -25,7 +25,7 @@
       </li>
     </ol>
   </section>
-  <async-workshop-clojuredoc varname="go" ismacro="true" arglists="([& body])">
+  <async-workshop-clojuredoc varname="go" vartype="macro" invocations="['(go & body)']">
     <p>
       Asynchronously executes the body, returning immediately to the calling thread. Additionally, any visible calls
       to &lt;!, &gt;! and alt!/alts! channel operations within the body will block (if necessary) by 'parking' the calling
