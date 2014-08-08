@@ -19,6 +19,11 @@
   :resource-paths ["resources"]
   :main async-workshop.server
   :hooks [leiningen.cljsbuild]
+  :cljsbuild {:builds [{:id "channel-demo"
+                        :source-paths ["src/channel-demo"]
+                        :compiler {:output-to "target/classes/public/components/async-workshop-channel-demo/async-workshop-channel-demo.js"
+                                   :optimizations :advanced
+                                   :pretty-print false}}]}
   :profiles {:dev {:source-paths ["devel/clj" "dev/cljs"]
                    :dependencies [[ring/ring-devel "1.3.0"]]
                    :plugins [[com.cemerick/austin "0.1.4"]]
@@ -27,12 +32,7 @@
                                          :compiler {:output-to "target/classes/public/js/chat-demo.js"
                                                     :output-dir "target/classes/public/js/chat-demo"
                                                     :optimizations :none
-                                                    :source-map true}}
-                                        {:id "channel-demo"
-                                         :source-paths ["src/channel-demo"]
-                                         :compiler {:output-to "target/classes/public/components/async-workshop-channel-demo/async-workshop-channel-demo.js"
-                                                    :optimizations :advanced
-                                                    :pretty-print false}}]}
+                                                    :source-map true}}]}
                    :repl-options {:init-ns user
                                   :init (start)
                                   :welcome (do
@@ -44,9 +44,4 @@
                                                         :output-dir "target/classes/public/components/async-workshop-channel-demo/out"
                                                         :optimizations :none
                                                         :source-map true}}]}}
-             :uberjar {:aot :all
-                       :cljsbuild {:builds [{:id "channel-demo"
-                                             :source-paths ["src/channel-demo"]
-                                             :compiler {:output-to "target/classes/public/components/async-workshop-channel-demo/async-workshop-channel-demo.js"
-                                                        :optimizations :advanced
-                                                        :pretty-print false}}]}}})
+             :uberjar {:aot :all}})
