@@ -51,14 +51,14 @@
                         </div>
                     </core-animated-pages>
                 </header>
-                <core-collapse opened="{{sourceVisible}}">
+                <core-collapse opened="{{sourceVisible}}" on-core-resize="{{calcSourcePaneHeights}}">
                     <paper-tabs id="source-tabs" selected="{{visibleSourceType}}">
                         <paper-tab name="clojure">Clojure</paper-tab>
                         <template if="{{!isClojureOnly}}">
                             <paper-tab name="clojurescript">ClojureScript</paper-tab>
                         </template>
                     </paper-tabs>
-                    <core-animated-pages transitions="slide-from-right" selected="{{visibleSourceType}}" id="source-pane" relative on-core-animated-pages-transition-end="{{sourcePanelChanged}}">
+                    <core-animated-pages transitions="slide-from-right" selected="{{visibleSourceType}}" id="source-pane" relative>
                         <div name="clojure">
                             <pre slide-from-right id="clj-source" class="brush: clojure; first-line: {{cljSource.line}}">{{cljSource.source | writeLines}}</pre>
                         </div>
@@ -68,16 +68,6 @@
                             </div>
                         </template>
                     </core-animated-pages>
-
-                    <core-animation id="source-panel-height-adjust" duration="300" easing="ease" on-core-animation-finish="{{updateSourcePaneHeight}}">
-                        <core-animation-keyframe>
-                            <core-animation-prop name="height" value="{{sourcePaneHeights.clojure}}"></core-animation-prop>
-                        </core-animation-keyframe>
-                        <core-animation-keyframe>
-                            <core-animation-prop name="height" value="{{sourcePaneHeights.clojurescript}}"></core-animation-prop>
-                        </core-animation-keyframe>
-                    </core-animation>
-
                 </core-collapse>
             </section>
 
