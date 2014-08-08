@@ -19,7 +19,8 @@
                            (enlive/set-attr :pageSubtitle subtitle)
                            (enlive/set-attr :enableChat (get-in request [:async-workshop :enable-chat?] false))
                            (enlive/content (content request) (nav-menu request)))
-  [:head :title] (enlive/content (str "Get going with core.async: " title)))
+  [:head :title] (enlive/content (str "Get going with core.async: " title))
+  [:div#preload-mid :span] (enlive/content title))
 
 (defmacro defpage
   ([name source menu options content-args & content-transforms]
