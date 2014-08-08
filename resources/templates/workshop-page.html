@@ -9,17 +9,32 @@
 
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
-  <title>Please provide a title</title>
-  <link rel="stylesheet" type="text/css" href="/styles/main.css">
-  <script src="/components/platform/platform.js"></script>
-  <link rel="import" href="/components/async-workshop-page/async-workshop-page.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+    <title>Please provide a title</title>
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
+    <script src="/components/platform/platform.js"></script>
+    <link rel="import" href="/components/async-workshop-page/async-workshop-page.html">
 </head>
-<body unresolved touch-action="auto" fullbleed>
-  <async-workshop-page>
-  </async-workshop-page>
+<body touch-action="auto" fullbleed>
+<div id="preload-content">
+    <div id="preload-mid">
+        <span>Insert title here</span>
+    </div>
+    <div id="preload-bottom">
+        <span>Please wait, loading page…</span>
+    </div>
+</div>
+<div id="real-content" class="hidden">
+    <async-workshop-page></async-workshop-page>
+</div>
+<script>
+    window.addEventListener('polymer-ready', function () {
+        document.getElementById('real-content').classList.remove('hidden');
+        document.getElementById('preload-content').classList.add('hidden');
+    });
+</script>
 
-  <script src="/js/main.js"></script>
+<script src="/js/main.js"></script>
 </body>
 </html>
