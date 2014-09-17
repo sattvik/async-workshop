@@ -12,23 +12,25 @@
 <link rel="import" href="/components/paper-button/paper-button.html">
 
 <polymer-element name="async-workshop-card" attributes="cardTitle buttons">
-  <template>
-    <link rel="stylesheet" type="text/css" href="async-workshop-card.css">
-    <section id="cardSection" layout vertical>
-      <header>
-        <h2 id="cardTitle">{{cardTitle}}</h2>
-      </header>
-      <div flex>
-        <content></content>
-      </div>
-      <div id="buttonRow" horizontal layout center>
-        <template repeat="{{button in buttons}}">
-          <a href="{{button.href}}"><paper-button label="{{button.name}}" on-mouseover="{{mouseOverHandler}}" on-mouseout="{{mouseOutHandler}}"></paper-button></a>
-        </template>
-      </div>
-      <paper-shadow z="1"></paper-shadow>
-    </section>
+    <template>
+        <link rel="stylesheet" type="text/css" href="async-workshop-card.css">
+        <section id="cardSection">
+            <header>
+                <h2 id="cardTitle">{{cardTitle}}</h2>
+            </header>
+            <div>
+                <content></content>
+            </div>
+            <div id="buttonRow" horizontal layout center>
+                <template repeat="{{button in buttons}}">
+                    <a href="{{button.href}}">
+                        <paper-button label="{{button.name}}" on-mouseover="{{mouseOverHandler}}" on-mouseout="{{mouseOutHandler}}"></paper-button>
+                    </a>
+                </template>
+            </div>
+            <paper-shadow z="1"></paper-shadow>
+        </section>
 
-  </template>
-  <script src="async-workshop-card.js"></script>
+    </template>
+    <script src="async-workshop-card.js"></script>
 </polymer-element>

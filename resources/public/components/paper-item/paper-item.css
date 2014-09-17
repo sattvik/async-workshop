@@ -8,38 +8,36 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-:host {
-  display: inline-block;
-  text-align: inherit;
-  color: #ccc;
+html /deep/ paper-item {
+  display: block;
   position: relative;
-  width: 20em;
+  font-size: 16px;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 16px;
+  white-space: nowrap;
 }
 
-:host:hover {
-  cursor: text;
-}
-
-input,
-textarea {
-  font: inherit;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: transparent;
-  border: none;
-  outline: none;
-  width: 100%;
-}
-
-textarea {
-  resize: none;
-}
-
-textarea[fit] {
+html /deep/ paper-item::shadow #ripple {
   position: absolute;
   top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+html /deep/ paper-item::shadow #icon {
+  margin-right: 8px;
+}
+
+html /deep/ paper-item::shadow ::content > a {
+  position: absolute;
+  top: 0;
   right: 0;
   bottom: 0;
+  left: 0;
 }
