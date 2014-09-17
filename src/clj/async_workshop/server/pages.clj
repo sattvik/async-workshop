@@ -25,7 +25,7 @@
   "templates/index.html"
   nav-menu
   {:title "Get going with core.asyc"
-   :subtitle "Lambda Jam Chicago 2014"})
+   :subtitle "Strange Loop 2014"})
 
 (defpage not-found
   "templates/not-found.html"
