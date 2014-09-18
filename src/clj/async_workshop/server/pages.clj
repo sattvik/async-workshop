@@ -24,8 +24,8 @@
 (defpage main-page
   "templates/index.html"
   nav-menu
-  {:title "Get going with core.asyc"
-   :subtitle "Strange Loop 2014"})
+  {:title "Get going with core.async"
+   :subtitle "Tutorial, reference, and more"})
 
 (defpage not-found
   "templates/not-found.html"
